@@ -6,8 +6,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 First, run the development server.
 If you have docker, you may want to run this command:
 ```bash
+docker build -t 'app-name' .
+```
+
+```bash
 docker compose up
 ```
+
+
 
 or if you do not have Docker Desktop application or docker environment on your development environment.
 
@@ -54,8 +60,22 @@ It is for building complicated and well performed forms in React. It is for avoi
 
 The forms are necesarry to communicate properly. They improve our communication quality with sending the request to the right endpoint.
 
-## Gün sonu önerileri
-BUTON İÇİN BİR ADET STATE HAZIRLANIP KIRMIZIYA DÖNDÜRÜLEBİLİR INVALİDKEN.
-Butonu ayrı bir komponente sarıp, ardından da errors'u bir prop olarak verip bunların iterasyonunda hatalı bir durum varsa o state'i false yapıp, butona class'ı eklenebilir.
+isSubmitting variable is for managing submission process when waiting for a response from backend service.
 
-Bugün eve gittiğimde en azından 2 saat buna uğraşsam tatlı olabilir bu arada...
+
+Hataları backendden dönüp, frontendde sadece hata yakalayıp onu yazdırmalıyım. Bence bu durum çok daha mantıklı.
+Formun validasyonunu Zodla yapabilirsin.
+Database'i dockerda ayağa kaldırabilirsin.
+Java Spring Boot application'unu dockerla ayağa kaldırabilirsin.
+
+Daha iyi UX için telefon numarasındaki input değerinin 10 karakterden sonra input değerlerini yazdırmasını bıraktırabilirim.
+
+SignUp bölümünde iki şifrenin eşit olup olmadığının validasyonu yapılmalı.
+
+## Login Algoritması
+Kullanıcının bilgilerini aldım.
+Uygun formata getirip istek attım.
+JWT token dönerse cookieyi oluşturmalıyım.
+Dönmezse login screende kalmalıyım.
+Ardından da cookie olarak setledim.
+Sonra zaten cookie state'ini react uygulaması kontrol ediyordu. Gidip değişimi görüp ona göre yönlendirme yapacak.

@@ -1,12 +1,15 @@
-import LoginForm from "@/components/LoginForm";
-import SignUpForm from "@/components/SignUpForm";
+import LoginForm from "@/components/Form/LoginForm";
+import PageContainer from "@/components/PageComponents/PageContainer";
+import SignUpForm from "@/components/Form/SignUpForm";
+import Navbar from "@/components/NavbarFiles/Navbar";
 
 
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <LoginForm></LoginForm>
-    </main>
+    <>
+      <Navbar></Navbar>
+      <PageContainer>Merhaba ana sayfa!!</PageContainer>
+    </>
   );
 }
