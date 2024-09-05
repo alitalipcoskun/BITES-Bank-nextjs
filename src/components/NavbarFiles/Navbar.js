@@ -5,9 +5,10 @@ import SandwichMenu from "./SandwichMenu";
 
 const NavItems = [
   { name: "Home", href: "" },
-  { name: "Profile", href: "" },
-  { name: "Transactions", href: "" },
-  { name: "Send", href: "" }
+  { name: "Profile", href: "/profile" },
+  { name: "Transactions", href: "/transactions" },
+  { name: "Send", href: "/send-money" },
+  {name: "Logout", href: "/logout"}
 ];
 
 const Navbar = () => {

@@ -1,13 +1,13 @@
 
 import SignUpForm from '@/components/Form/SignUpForm'
-import PageTemplate from '@/components/PageComponents/PageTemplate'
+import PageContainer from '@/components/PageComponents/PageContainer'
 import React from 'react'
 
 const SignUpPage = () => {
   return (
-    <PageTemplate>
-        <SignUpForm></SignUpForm>
-    </PageTemplate>
+    <PageContainer className="flex-col items-center h-screen w-screen">
+        <SignUpForm className = "m-auto"></SignUpForm>
+    </PageContainer>
   )
 }
 

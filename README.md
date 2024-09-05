@@ -79,3 +79,6 @@ JWT token dönerse cookieyi oluşturmalıyım.
 Dönmezse login screende kalmalıyım.
 Ardından da cookie olarak setledim.
 Sonra zaten cookie state'ini react uygulaması kontrol ediyordu. Gidip değişimi görüp ona göre yönlendirme yapacak.
+
+
+AXIOS CONFIGURATION FOR BEARER TOKENS AND BODY
