@@ -1,12 +1,11 @@
 "use client"
 import PageContainer from "@/components/PageComponents/PageContainer";
-import react, { useState, useEffect, useCallback, useContext} from "react";
+import {  useEffect, useCallback, useContext} from "react";
 import Navbar from "@/components/NavbarFiles/Navbar";
 import Cookies from 'js-cookie';
 import axios from "axios";
 import { AuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
-import { redirect } from "next/dist/server/api-utils";
 import { useRouter } from "next/navigation";
 
 
@@ -15,7 +14,7 @@ import { useRouter } from "next/navigation";
 
 
 export default function Home() {
-  const {login, user} = useContext(AuthContext);
+  const {login, user } = useContext(AuthContext);
   const token = Cookies.get("jwt");
   const router = useRouter();
   const fetchUser = useCallback(async () => {
@@ -36,7 +35,7 @@ export default function Home() {
       catch (error) {
         console.log(error);
       }
-    }, [token])
+    }, [token]);
 
   useEffect(() => {
     fetchUser();

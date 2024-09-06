@@ -1,9 +1,33 @@
 # BITES Bank Project
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+## Yapılabilecek eklemeler
+Hataları backendden dönüp, frontendde sadece hata yakalayıp onu yazdırmalıyım. Bence bu durum çok daha mantıklı.
+Database'i dockerda ayağa kaldırabilirsin.
+Java Spring Boot application'unu dockerla ayağa kaldırabilirsin.
+
+## Tech Stack
+
+- **Frontend**: Next.js, Tailwind CSS
+- **Backend**: Java Spring Boot, PostgreSQL
+- **Authentication**: JWT stored in HTTP-only cookies
 
 ## Getting Started
 
 First, run the development server.
+Navigate to the project directory.
+Then, run:
+```bash
+npm install
+```
+to run the project on your local machine.
+
+If you do not have Docker Desktop application or docker environment on your development environment.
+
+```bash
+npm run dev
+```
+
+
 If you have docker, you may want to run this command:
 ```bash
 docker build -t 'app-name' .
@@ -13,19 +37,8 @@ docker build -t 'app-name' .
 docker compose up
 ```
 
-
-
-or if you do not have Docker Desktop application or docker environment on your development environment.
-
-```bash
-npm run dev
-```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
 ## User Authentication and Authorization in React
 
@@ -63,11 +76,6 @@ The forms are necesarry to communicate properly. They improve our communication 
 isSubmitting variable is for managing submission process when waiting for a response from backend service.
 
 
-Hataları backendden dönüp, frontendde sadece hata yakalayıp onu yazdırmalıyım. Bence bu durum çok daha mantıklı.
-Formun validasyonunu Zodla yapabilirsin.
-Database'i dockerda ayağa kaldırabilirsin.
-Java Spring Boot application'unu dockerla ayağa kaldırabilirsin.
-
 Daha iyi UX için telefon numarasındaki input değerinin 10 karakterden sonra input değerlerini yazdırmasını bıraktırabilirim.
 
 SignUp bölümünde iki şifrenin eşit olup olmadığının validasyonu yapılmalı.
@@ -82,3 +90,5 @@ Sonra zaten cookie state'ini react uygulaması kontrol ediyordu. Gidip değişim
 
 
 AXIOS CONFIGURATION FOR BEARER TOKENS AND BODY
+
+COOKIE'yi oluştururken attığım istek, esasında kontrol mekanizmamı tetiklemekte. Onu yaparken kontrol ettikten sonra, eğer profil bilgileri nullsa yönlendirebilirim. Ek olarak ayrı bir şekilde kontrol mekanizması yapabilirim. Yapmak da mantıklı duruyor.

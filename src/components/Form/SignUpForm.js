@@ -1,19 +1,20 @@
 "use client"
-import React from 'react';
+import React, {useState} from 'react';
 import { useForm } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import LabeledInput from './LabeledInput';
 import UIImage from '../Image';
-import { Button } from '../ui/button';
 import FormButton from './FormButton';
-import PageContainer from '../PageComponents/PageContainer';
 import Link from 'next/link';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 
 const digitsOnly = (value) => /^\d{10}$/.test(value)
 
+
+// Rulesets and field for sign in
 const signInSchema = yup.object({
   name: yup.string().required("Name is required"),
   surname: yup.string().required("Surname is required"),
@@ -26,8 +27,15 @@ const signInSchema = yup.object({
 
 
 const SignUpForm = (props) => {
-  const { register, handleSubmit, formState: { errors, isSubmitting }, getValues } = useForm({resolver: yupResolver(signInSchema) });
+  // For controlling the form precisely
+  const { register, handleSubmit,  setError, formState: { errors, isSubmitting }, getValues } = useForm({resolver: yupResolver(signInSchema) });
 
+  const[message, setMessage] = useState();
+
+  // To direct the user to another end-point after successfully made sign up process
+  const router = useRouter(); 
+
+  // It is the input fields that is necesarry to sign in the user.
   const signUpReq = [{ name: "name", label: "Name", type: "text", placeholder: "Your name", ruleSet: { required: "Name is required.", maxLength: 30, minLength: 2 } },
   { name: "surname", label: "Surname", type: "text", placeholder: "Your surname"},
   { name: "mail", type: "email", label: "Email", placeholder: "xxxxx@xxxx.com"}, //Turkish chars are problem currently
@@ -36,18 +44,31 @@ const SignUpForm = (props) => {
   { name: "password_again", type: "password", label: "Password again", placeholder: "Should match with the above field" }
   ];
 
+  const onSubmit = async (payload) => {
 
+    // Tries to send user information to backend service.
+    try {
+      console.log("Entered!");
+      const response = await axios.post("http://127.0.0.1:8080/api/v1/auth/register", {
+        "name": payload.name,
+        "surname": payload.surname,
+        "mail": payload.mail,
+        "phone": payload.phone,
+        "password":payload.password,
+      })
+      console.log(response)
+      // Throw error for failed requests.
+      const {message} = response.data;
+      // Throw error for already existing user
 
-  const checkValidity = (duplicatedPassword) => {
-    const { password } = getValues();
-    return password === duplicatedPassword || "Password must match"
-
+      setMessage(message);
+    }
+    //Catches the error while trying to send the user data to the backend service.
+    catch(error) {
+      console.log(error);
+      setError(error);
+    }
   }
-
-  const onSubmit = (data) => {
-    console.log(data);
-  }
-  console.log(errors);
   return (
       <Card className={`display-flex flex-col h-fit w-[80vw] sm:w-fit shadow-md  ${props.className}`}>
         <CardHeader>
@@ -59,14 +80,14 @@ const SignUpForm = (props) => {
           </CardDescription>
         </CardHeader>
         <CardContent className="display-flex flex-col h-full sm:min-h-96 items-center" >
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center text-left" >
+          {message ? (<p>{message}</p>) : (<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center text-left" >
             <UIImage src={"/bites_logo.jpg"} className={"mb-4"}></UIImage>
             {signUpReq.map((label, idx) => {
               return <LabeledInput register={register} {...label} key={idx} errors={errors} isSubmitting={isSubmitting} ></LabeledInput>
             })}
             <p>If you're already have account on this service, you can log in from <Link href="/login" className="text-blue-500 underline">here.</Link></p>
             <FormButton type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Sign Up" />
-          </form>
+          </form>)}
         </CardContent>
       </Card>
 

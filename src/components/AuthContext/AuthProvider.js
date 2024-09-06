@@ -24,6 +24,7 @@ const initialState = {
 // This component will wrap the app so that this context will be used in entire application.
 export const AuthProvider = (props) => {
   const [state, dispatchAuth] = useReducer(AuthReducer, initialState);
+  
 
   const LoginUser = (userData) => {
     dispatchAuth({ type: "LOGIN", payload: userData });
