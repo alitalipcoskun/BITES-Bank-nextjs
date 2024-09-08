@@ -40,6 +40,23 @@ docker compose up
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 
+## Errors that I faced on Docker
+The project had run on npm run dev on my local machine. However, it was unable to run on my docker
+container. 
+I solved it with this approach on my docker container command line:
+
+```bash
+npm ls yup
+```
+
+nothing showed. Then I run
+
+```bash
+npm i yup
+```
+on docker container terminal. It is solved. I need to search this issue whether it can be solved
+differently or not.
+
 ## User Authentication and Authorization in React
 
 ![alt text](readme_images/react_auth_diagram.png)

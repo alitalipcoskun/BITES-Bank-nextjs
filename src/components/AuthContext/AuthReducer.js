@@ -1,3 +1,4 @@
+
 import React from 'react'
 
 
@@ -6,25 +7,31 @@ import React from 'react'
 const AuthReducer = (state, action) => {
     switch (action.type) {
         case "LOGIN":
+
             return {
                 ...state,
+                cookieFlag: true,
                 isAuthenticated: true,
                 user: action.payload
             }
-            break;
 
         case "LOGOUT":
+
             return {
                 ...state,
+                cookieFlag: false,
                 isAuthenticated: false,
                 user: null
             }
-            break;
         
+        case "AUTHENTICATE":
+            return {
+                ...state,
+                isAuthenticated: true,
+            }
 
         default:
             return state
-            break;
     }
 }
 

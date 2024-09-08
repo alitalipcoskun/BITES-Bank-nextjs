@@ -18,6 +18,7 @@ const LogoutPage = () => {
     const token = Cookies.get("jwt")
     const signOut = useCallback(() => {
         if (token) {
+            console.log("Removing token!");
             Cookies.remove("jwt", { path: '' })
             logout();
             setCookieFlag(true);
@@ -28,6 +29,8 @@ const LogoutPage = () => {
 
     useEffect(() => {
         signOut();
+        console.log(cookieflag);
+        console.log(signedOut);
         if(!cookieflag && !signedOut){
             router.push("/login")
         }

@@ -18,8 +18,10 @@ export default function Home() {
   const token = Cookies.get("jwt");
   const router = useRouter();
   const fetchUser = useCallback(async () => {
-    if (token) {}
-      try {
+        console.log(token);
+        
+    
+        try {
         const response = await axios.post(
           'http://127.0.0.1:8080/api/v1/user/profile',
           { token: token },
@@ -30,6 +32,10 @@ export default function Home() {
             },
           }
         );
+        // Errors will thrown with respect to the response status.
+        if(token === undefined){
+          router.push("/login");
+        }
         login(response.data);
       }
       catch (error) {
@@ -38,6 +44,7 @@ export default function Home() {
     }, [token]);
 
   useEffect(() => {
+    
     fetchUser();
   }, [fetchUser]);
 
@@ -45,7 +52,7 @@ export default function Home() {
   return (
     <>
       <Navbar></Navbar>
-      <PageContainer>{user === null || !token  ? (token ? (<Spinner></Spinner>) : router.push("/login"))  : `${user.name}`}</PageContainer>
+      <PageContainer>{user === undefined ? (<Spinner></Spinner>) : (!user ? "Redirecting..": `${user.name}`)}</PageContainer>
     </>
   );
 }

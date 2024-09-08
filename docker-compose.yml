@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
+      - .:/app
       - ./:/app:delegated
       - /app/node_modules
     ports:
