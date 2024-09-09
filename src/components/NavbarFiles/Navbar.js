@@ -7,7 +7,6 @@ const NavItems = [
   { name: "Home", href: "" },
   { name: "Profile", href: "/profile" },
   { name: "Transactions", href: "/transactions" },
-  { name: "Send", href: "/send-money" },
   {name: "Logout", href: "/logout"}
 ];
 

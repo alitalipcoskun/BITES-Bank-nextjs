@@ -3,10 +3,11 @@ import React from 'react'
 import NavItem from './NavItem'
 
 
-import { SheetContent, SheetTrigger, Sheet } from '../ui/sheet';
+import { SheetContent, SheetTrigger, Sheet, SheetTitle } from '../ui/sheet';
 import { Button } from '../ui/button';
 
 
+// SheetTitle component is mandatory for this code snippet. Try to avoid using it because of bad looking interface.
 const SandwichMenu = ({ items }) => {
     return (
         <Sheet>

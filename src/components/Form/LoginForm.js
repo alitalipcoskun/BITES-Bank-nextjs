@@ -24,31 +24,39 @@ const logInReq = [
 
 const LoginForm = (props) => {
     // AuthContext is added for updating user profile.
-    const {login, isAuthenticated, setAuthenticated} = useContext(AuthContext);
+    const {login, isAuthenticated, setAuthenticated, validateStatus} = useContext(AuthContext);
     // The variable is for directing user to another page after process
     const router = useRouter();
     // Library allows control and give feedback to user precisely.
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm();
+    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({criteriaMode: 'all'});
 
     const [jwt, setJwt] = useState(Cookies.get("jwt") !== undefined);
     const onSubmit = async (payload) => {
-        window.location.reload();
+        //window.location.reload();
         // Tries to fetch data if it is not ok, then error(s) are thrown and cought by form to give feedback to the user.
         try {
             const response = await axios.post("http://127.0.0.1:8080/api/v1/auth/authenticate", {
                 "phone": payload.phone,
                 "password": payload.password
             });
-            //If response is different than 200, throw an error.
-            // checkResponseStatus() it will throw error and error will be cought to render.
+            
             const { token } = response.data;
-            // I need to implement catch structure to this field. However, i cannot at the moment.
-            // If token is empty throw an error.
-            Cookies.set('jwt', token, { expires: 7, secure: false })
-            setAuthenticated({action: "AUTHENTICATE", payload: true})
+        
+            // If token is empty, throw an error
+            
+        
+            // Set the JWT in cookies and authenticate
+            Cookies.set('jwt', token, { expires: 7, secure: false });
+            setAuthenticated({ action: "AUTHENTICATE", payload: true });
             router.push("/");
+        
         } catch (error) {
-            setError("root", error.message);
+            console.log(error);
+            // Handle the error, display custom message using setError
+            const shownErr = validateStatus(error);
+        
+            // Set the error in the root if something goes wrong
+            setError(shownErr.label, shownErr.value);
         }
     }
     if(jwt){

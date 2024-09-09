@@ -73,9 +73,9 @@ const SignUpForm = (props) => {
     //Catches the error while trying to send the user data to the backend service.
     catch (error) {
       console.log(error);
-      setError("phone", { type: 'custom', message: error });
-      setError("mail", {type: `custom`, message: error});
-      setError("root", {type: `custom`, message: error});
+      setError("phone", { type: 'custom', message: error.response.data.message });
+      setError("mail", {type: `custom`,  message: error.response.data.message});
+      setError("root", {type: `custom`,  message: error.response.data.message});
       console.log(errors);
     }
   }
@@ -89,16 +89,16 @@ const SignUpForm = (props) => {
           Sign Up to BITES bank for making operations and creating a bank account
         </CardDescription>
       </CardHeader>
-      <CardContent className="display-flex flex-col h-full sm:min-h-96 items-center" >
-        (<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center text-left" >
-          <UIImage src={"/bites_logo.jpg"} className={"mb-4"}></UIImage>
+      <CardContent className="display-flex flex-col h-fit sm:min-h-96 items-center" >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center text-left" >
+          <UIImage src={"/bites_logo.jpg"} className={"mb-4"}/>
+          {errors["root"] && <p className="text-red-500">{errors["root"].message}</p>}
           {signUpReq.map((label, idx) => {
             return <LabeledInput register={register} {...label} key={idx} errors={errors} isSubmitting={isSubmitting} name={label["name"]} ></LabeledInput>
           })}
           <p>If you're already have account on this service, you can log in from <Link href="/login" className="text-blue-500 underline">here.</Link></p>
           <FormButton type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Sign Up" />
         </form>
-        {errors["root"] && <p>{errors["root"].message}</p>})
       </CardContent>
     </Card>
 

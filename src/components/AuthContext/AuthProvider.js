@@ -1,6 +1,7 @@
 "use client"
-import React, { createContext, useReducer }  from 'react'
+import React, { createContext, useReducer, useContext }  from 'react'
 import AuthReducer from './AuthReducer'
+import Cookies from 'js-cookie';
 
 
 
@@ -13,7 +14,8 @@ export const AuthContext = createContext({
   login: () => { },
   logout: () => { },
   cookieFlag: undefined,
-  validateStatus: () => {}
+  validateStatus: () => {},
+  fetchUser: () => {},
 });
 
 
@@ -27,14 +29,19 @@ const initialState = {
 
 // This component will wrap the app so that this context will be used in entire application.
 export const AuthProvider = (props) => {
+
   const [state, dispatchAuth] = useReducer(AuthReducer, initialState);
   
   const ValidateStatus = (response) => {
-    switch (response.data.statusCode) {
+    switch (response.status) {
+      case 401:
+        return {label: "root", value: { type: "custom", message: response.response.data.message}}
+      
       case 403:
-        throw new Error(response.data.message);
-        break;
-    
+        return{label: "root", value: { type: "custom", message: response.response.data.message}}
+
+      case 404:
+        return {label: "root", value: { type: "custom", message: response.response.data.message}}
       default:
         break;
     }
@@ -52,8 +59,13 @@ export const AuthProvider = (props) => {
     dispatchAuth({type: "AUTHENTICATE", payload: true})
   }
 
-  return <AuthContext.Provider value={{ ...state, login: LoginUser, logout: LogoutUser, setAuthenticated: SetAuthenticated, validateStatus: ValidateStatus }}>
+
+  return <AuthContext.Provider value={{ ...state, login: LoginUser, logout: LogoutUser, setAuthenticated: SetAuthenticated, validateStatus: ValidateStatus}}>
     {props.children}
   </AuthContext.Provider>
-
 }
+
+export const useAuthContext = () => {
+  return useContext(AuthContext);
+}
+
