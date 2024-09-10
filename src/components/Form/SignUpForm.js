@@ -33,7 +33,7 @@ const SignUpForm = (props) => {
   const [jwt, setJwt] = useState(Cookies.get('jwt') !== undefined);
 
   //Auth Context is imported for catching errors
-  const {validateStatus} = useContext(AuthContext);
+  const {validateStatus, axiosInstance} = useContext(AuthContext);
 
   // For controlling the form precisely
   const { register, handleSubmit, setError, formState: { errors, isSubmitting }, getValues } = useForm({ resolver: yupResolver(signInSchema) });
@@ -59,7 +59,7 @@ const SignUpForm = (props) => {
 
     // Tries to send user information to backend service.
     try {
-      const response = await axios.post("http://127.0.0.1:8080/api/v1/auth/register", {
+      const response = await axiosInstance.post("/api/v1/auth/register", {
         "name": payload.name,
         "surname": payload.surname,
         "mail": payload.mail,

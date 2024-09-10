@@ -1,91 +1,145 @@
 "use client"
-import { useEffect, useCallback, useContext } from "react";
-import Navbar from "@/components/NavbarFiles/Navbar";
+import { useEffect, useCallback, useContext, useState } from "react";
 import Cookies from 'js-cookie';
-import axios from "axios";
 import { AuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import PageTemplate from "@/components/PageComponents/PageTemplate";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { useForm } from "react-hook-form";
-import FormButton from "@/components/Form/FormButton";
+import CreateAccForm from "@/components/Form/CreateAccForm";
+import Table from "@/components/Table/Table";
+import { AccountColumns } from "@/components/Data/AccountColumns";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 
 
 
-
-
-const options = [
-  { name: "Dollar", type: "dollar" },
-  { name: "Turkish Lira (TL)", type: "tl" },
-  { name: "Euro", type: "eu" }]
 
 
 export default function Home() {
-  const { login, user } = useContext(AuthContext);
+  const { login, user, axiosInstance, validateStatus } = useContext(AuthContext);
   const token = Cookies.get("jwt");
   const router = useRouter();
+  const [createdAcc, setCreatedAcc] = useState(undefined);
+  const [creationError, setCreationError] = useState(undefined);
+  const [accounts, setAccounts] = useState(undefined);
+  const [userPhone, setUserPhone] = useState("");
 
-  // Library allows control and give feedback to user precisely.
-  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm();
+  const [createDialog, setCreateDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState({});
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await axios.post(
-        'http://127.0.0.1:8080/api/v1/user/profile',
-        { token: token },
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+
+      const response = await axiosInstance.post(
+        '/api/v1/user/profile',
+        { token: token }
       );
+      console.log(response);
       // Errors will thrown with respect to the response status.
       if (token === undefined) {
         router.push("/login");
       }
       login(response.data);
+      console.log(response.data);
+      setUserPhone(response.data.phone);
     }
     catch (error) {
-      console.log(error);
+      const errMsg = validateStatus(error);
+      setCreationError(errMsg.label, errMsg.value);
     }
-  }, [token]);
+  }, [token, createdAcc]);
+
+
+  const fetchAccounts = useCallback(async () => {
+    console.log(userPhone);
+    try {
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axiosInstance.defaults.headers.get["Content-Type"] = 'application/json';
+
+      console.log(user.phone);
+      const response = await axiosInstance.get(
+        `/api/v1/account/accounts`,
+        {
+          params: {
+            phoneNumber: user.phone
+          }
+        }
+      );
+      console.log(response);
+      // Errors will thrown with respect to the response status.
+      if (token === undefined) {
+        router.push("/login");
+      }
+      setAccounts(response.data);
+      console.log(response.data);
+    }
+    catch (error) {
+      const errMsg = validateStatus(error);
+      //setCreationError(errMsg.label, errMsg.value);
+    }
+  }, [token, userPhone]);
+
+
   useEffect(() => {
-
     fetchUser();
-  }, [fetchUser]);
+    fetchAccounts();
+  }, [fetchUser, fetchAccounts]);
 
-  const onSubmit = (payload) => {
+
+  const onSubmit = async (payload) => {
     console.log(payload);
-    // POST request to create an account.
+    try {
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+      const response = await axiosInstance.post("/api/v1/account/new-account", {
+        "money_type": payload.account_type
+      });
+      setCreatedAcc(response.data);
+
+    } catch (error) {
+      const errMsg = validateStatus(error);
+      setCreationError(errMsg);
+    }
   }
 
-  // Ref or form added to select component.
-  // Also the entire creating process will implement to the pop up.
-  // Check your previous knowledge.
+  const onDelete = async () => {
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+    const response = await axiosInstance.post("/api/v1/account/delete-account", {
+      "no": selectedItem.no
+    });
+
+
+    fetchAccounts();
+  }
+
 
   return (
     <>
       <PageTemplate>{user === undefined ? (<Spinner className="m-auto"></Spinner>) : (!user ? "Redirecting.." :
         <div className="flex flex-col w-screen h-screen text-center justify-center">
-          <Card className="shadow-xl flex flex-col w-fit h-fit justify-center text-left m-auto container">
+          <Card className="shadow-xl flex flex-col w-[80vw] sm:w-fit h-fit justify-center text-left m-auto container">
             <CardTitle className="container">
               Account informations
             </CardTitle>
             <CardDescription className="container">
               Welcome to BITES Bank! {user && `${user.name}`}
             </CardDescription>
-            <CardContent className="container">
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <select className="w-72" {...register("money_type", { required: true })}>
-                  {options.map((item, idx) => {
-                    return <option value={item.value} key={idx}>{item.name}</option>
-                  })}
-                </select>
-                {errors.root && <p className="text-red-500">{errors.root.message}</p>}
-                <FormButton className= "ml-28" type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Create Account"/>
-              </form>
+            <CardContent className="flex flex-col justify-center align-middle w-fit h-fit">
+              {creationError && <p>{creationError}</p>}
+
+              <Button label="Show" icon="pi pi-external-link" onClick={() => setCreateDialog(true)} />
+              <Dialog header="Create a new account" visible={createDialog} onHide={() => { if (!createDialog) return; setCreateDialog(false); }}
+                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                <CreateAccForm onSubmit={onSubmit} errMsg={creationError} />
+                <Button onClick={() => { if (!createDialog) return; setCreateDialog(false); }}>Close</Button>
+              </Dialog>
+              <Button onClick={onDelete}>Delete</Button>
+              <Table data={accounts} columns={AccountColumns} setSelectedItem={setSelectedItem}
+                selectedItem={selectedItem}></Table>
             </CardContent>
           </Card>
         </div>)}</PageTemplate>

@@ -109,3 +109,13 @@ Sonra zaten cookie state'ini react uygulaması kontrol ediyordu. Gidip değişim
 AXIOS CONFIGURATION FOR BEARER TOKENS AND BODY
 
 COOKIE'yi oluştururken attığım istek, esasında kontrol mekanizmamı tetiklemekte. Onu yaparken kontrol ettikten sonra, eğer profil bilgileri nullsa yönlendirebilirim. Ek olarak ayrı bir şekilde kontrol mekanizması yapabilirim. Yapmak da mantıklı duruyor.
+
+## Yarın Yapacaklarım:
+Transaction işlemini gerçekleştireceğim. Para yüklenen bir pop up modal yazacağım. Ardından da yapılan transfer işlemlerini görselleştirip göstereceğim.
+
+Vaktim kaldığında da şifre yenilemeyle alakalı bir arayüz yazacağım. Eski şifre ve dbdeki şifre matchlenirse yeni şifreyi eski şifrenin üzerine yazacağım.
+
+Sonraki güne sarkarsa ona göre hareket ederim. Mobil üzerinden doğrulama kodu göndertip onu da doğrulayan bir sistem yazabilirim hafta bitene kadar.
+
+## Eklenebilecek özellik
+Kullanıcı para gönderirken, sahip olduğu hesapları kaydırmalı olarak seçebilir. Göndereceği hesabın sahibinin isminin ve soy isminin ilk harflerini gözükür bir şekilde yazdırılır.

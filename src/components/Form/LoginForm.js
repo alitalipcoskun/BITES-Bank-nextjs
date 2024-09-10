@@ -7,7 +7,6 @@ import UIImage from '../Image';
 import FormButton from './FormButton';
 import PageContainer from '../PageComponents/PageContainer';
 import Link from 'next/link';
-import axios from 'axios';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '../ui/spinner';
@@ -16,6 +15,8 @@ import { AuthContext } from '../AuthContext/AuthProvider';
 
 // It is the input fields that is required to give authorization to user.
 // Rulesets may change. In my opinion, a library is mandatory to manage them to learn.
+
+// YUP MUST GET IMPLEMENTED TO THIS PAGE.
 const logInReq = [
     { name: "phone", type: "number", label: "Mobile phone number", placeholder: "Your phone number 5xxxxxxxxx", ruleSet: { required: "Verify your phone number", minLength: { value: 10, message: "Phone number must have 10 characters." }, maxLength: { value: 10, message: "Phone number must have 10 characters." } } },
 
@@ -24,41 +25,43 @@ const logInReq = [
 
 const LoginForm = (props) => {
     // AuthContext is added for updating user profile.
-    const {login, isAuthenticated, setAuthenticated, validateStatus} = useContext(AuthContext);
+    const {login, isAuthenticated, setAuthenticated, validateStatus, axiosInstance} = useContext(AuthContext);
     // The variable is for directing user to another page after process
     const router = useRouter();
     // Library allows control and give feedback to user precisely.
-    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({criteriaMode: 'all'});
-
+    const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm();
+    
+    // The useState is used in order to see the results of the changes in this page.
     const [jwt, setJwt] = useState(Cookies.get("jwt") !== undefined);
     const onSubmit = async (payload) => {
-        //window.location.reload();
         // Tries to fetch data if it is not ok, then error(s) are thrown and cought by form to give feedback to the user.
         try {
-            const response = await axios.post("http://127.0.0.1:8080/api/v1/auth/authenticate", {
+            const response = await axiosInstance.post("/api/v1/auth/authenticate", {
                 "phone": payload.phone,
                 "password": payload.password
             });
-            
+            // If token is empty, it throws error.
             const { token } = response.data;
-        
-            // If token is empty, throw an error
-            
-        
+
             // Set the JWT in cookies and authenticate
             Cookies.set('jwt', token, { expires: 7, secure: false });
+
             setAuthenticated({ action: "AUTHENTICATE", payload: true });
             router.push("/");
         
         } catch (error) {
             console.log(error);
             // Handle the error, display custom message using setError
-            const shownErr = validateStatus(error);
+            const errMsg = validateStatus(error);
         
             // Set the error in the root if something goes wrong
-            setError(shownErr.label, shownErr.value);
+            setError(errMsg.label, errMsg.value);
         }
     }
+
+    // If auth successfully done, then it routes back to the main page.
+    // Also, If any user already authenticated to use this service, then it is unable to see this page
+    // thanks to this if check.
     if(jwt){
         router.push("/");
     }

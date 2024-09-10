@@ -1,6 +1,13 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
+import 'primereact/resources/primereact.css'
 import { AuthProvider } from "@/components/AuthContext/AuthProvider";
+import { PrimeReactProvider} from 'primereact/api';
+import React from 'react';
+import 'primeicons/primeicons.css';
+import 'primeflex/primeflex.css';  
+import 'primereact/resources/primereact.css';
+import 'primereact/resources/themes/lara-light-indigo/theme.css';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,9 +21,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <PrimeReactProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </PrimeReactProvider>
+
       </body>
     </html>
   );

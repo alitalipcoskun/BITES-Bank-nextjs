@@ -83,6 +83,7 @@
     @apply border-border;
   }
   body {
+    font-family: var(--font-family);
     @apply bg-background text-foreground;
   }
 }
