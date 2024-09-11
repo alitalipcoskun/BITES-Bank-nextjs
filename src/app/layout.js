@@ -9,6 +9,9 @@ import 'primeflex/primeflex.css';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorComponent from "@/errorHandling/ErrorComponent";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -21,11 +24,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
+        <ErrorBoundary
+        FallbackComponent={ErrorComponent}>
         <PrimeReactProvider>
           <AuthProvider>
             {children}
           </AuthProvider>
         </PrimeReactProvider>
+        </ErrorBoundary>
 
       </body>
     </html>

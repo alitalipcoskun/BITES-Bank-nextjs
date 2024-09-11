@@ -9,14 +9,18 @@ import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/c
 import CreateAccForm from "@/components/Form/CreateAccForm";
 import Table from "@/components/Table/Table";
 import { AccountColumns } from "@/components/Data/AccountColumns";
-import { Button } from "primereact/button";
+import { Button } from "@/components/ui/button";
 import { Dialog } from "primereact/dialog";
-
+import { useErrorBoundary } from "react-error-boundary";
 
 
 
 
 export default function Home() {
+  // Error handling
+  const { showBoundary } = useErrorBoundary();
+
+
   const { login, user, axiosInstance, validateStatus } = useContext(AuthContext);
   const token = Cookies.get("jwt");
   const router = useRouter();
@@ -26,7 +30,9 @@ export default function Home() {
   const [userPhone, setUserPhone] = useState("");
 
   const [createDialog, setCreateDialog] = useState(false);
-  const [selectedItem, setSelectedItem] = useState({});
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [deleteDialog, setDeleteDialog] = useState(false);
 
   const fetchUser = useCallback(async () => {
     try {
@@ -45,6 +51,7 @@ export default function Home() {
       login(response.data);
       console.log(response.data);
       setUserPhone(response.data.phone);
+      fetchAccounts(response.data.phone);
     }
     catch (error) {
       const errMsg = validateStatus(error);
@@ -53,18 +60,16 @@ export default function Home() {
   }, [token, createdAcc]);
 
 
-  const fetchAccounts = useCallback(async () => {
-    console.log(userPhone);
+  const fetchAccounts = useCallback(async (phone) => {
     try {
+      console.log(phone);
       axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       axiosInstance.defaults.headers.get["Content-Type"] = 'application/json';
-
-      console.log(user.phone);
       const response = await axiosInstance.get(
         `/api/v1/account/accounts`,
         {
           params: {
-            phoneNumber: user.phone
+            phoneNumber: phone
           }
         }
       );
@@ -75,17 +80,19 @@ export default function Home() {
       }
       setAccounts(response.data);
       console.log(response.data);
+
     }
     catch (error) {
       const errMsg = validateStatus(error);
       //setCreationError(errMsg.label, errMsg.value);
+      showBoundary(error);
     }
   }, [token, userPhone]);
 
 
   useEffect(() => {
     fetchUser();
-    fetchAccounts();
+
   }, [fetchUser, fetchAccounts]);
 
 
@@ -100,12 +107,14 @@ export default function Home() {
       setCreatedAcc(response.data);
 
     } catch (error) {
-      const errMsg = validateStatus(error);
-      setCreationError(errMsg);
+      //const errMsg = validateStatus(error);
+      //setCreationError(errMsg);
+      showBoundary(error);
     }
   }
 
   const onDelete = async () => {
+    setDeleteDialog(false);
     axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
     const response = await axiosInstance.post("/api/v1/account/delete-account", {
@@ -113,36 +122,45 @@ export default function Home() {
     });
 
 
-    fetchAccounts();
+    fetchAccounts(userPhone);
   }
-
 
   return (
     <>
       <PageTemplate>{user === undefined ? (<Spinner className="m-auto"></Spinner>) : (!user ? "Redirecting.." :
         <div className="flex flex-col w-screen h-screen text-center justify-center">
           <Card className="shadow-xl flex flex-col w-[80vw] sm:w-fit h-fit justify-center text-left m-auto container">
-            <CardTitle className="container">
+            <CardTitle className="container py-4 px-6 text-left">
               Account informations
             </CardTitle>
-            <CardDescription className="container">
-              Welcome to BITES Bank! {user && `${user.name}`}
+            <CardDescription className="container py-4 px-6 text-left">
+              Welcome to BITES Bank! {user && `${user.name} ` + `${user.surname}`}
             </CardDescription>
             <CardContent className="flex flex-col justify-center align-middle w-fit h-fit">
               {creationError && <p>{creationError}</p>}
-
-              <Button label="Show" icon="pi pi-external-link" onClick={() => setCreateDialog(true)} />
               <Dialog header="Create a new account" visible={createDialog} onHide={() => { if (!createDialog) return; setCreateDialog(false); }}
-                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                style={{ width: '50vw',}} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
                 <CreateAccForm onSubmit={onSubmit} errMsg={creationError} />
-                <Button onClick={() => { if (!createDialog) return; setCreateDialog(false); }}>Close</Button>
+                <Button onClick={() => { if (!createDialog) return; setCreateDialog(false); }} 
+                className="w-full sm:w-fit sm:mt-4">Close</Button>
               </Dialog>
-              <Button onClick={onDelete}>Delete</Button>
+              <Dialog header="Delete Account"  visible={deleteDialog} onHide={() => { if (!deleteDialog) return; setDeleteDialog(false); }}
+                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                {selectedItem !== null && <p className="mb-4">Are you sure about deleting <bold className="font-bold">{selectedItem.no}</bold> account?</p>}
+                <Button onClick={() => { if (!deleteDialog) return; setDeleteDialog(false); }} className="w-full sm:w-fit mr-2">No</Button>
+                <Button onClick={onDelete} className="w-full sm:w-fit">Yes</Button>
+              </Dialog>
+              <div className="flex flex-row align-middle w-fit my-4">
+                <Button label="Create Account" onClick={() => setCreateDialog(true)} className="w-full sm:w-fit" >
+                  Create
+                </Button>
+                <Button onClick={() => {setDeleteDialog(true)}} className="w-full sm:w-fit ml-2"
+                 disabled={selectedItem === null}>Delete</Button>
+              </div>
               <Table data={accounts} columns={AccountColumns} setSelectedItem={setSelectedItem}
                 selectedItem={selectedItem}></Table>
             </CardContent>
           </Card>
         </div>)}</PageTemplate>
-    </>
-  );
+    </>)
 }

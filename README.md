@@ -4,6 +4,7 @@
 Hataları backendden dönüp, frontendde sadece hata yakalayıp onu yazdırmalıyım. Bence bu durum çok daha mantıklı.
 Database'i dockerda ayağa kaldırabilirsin.
 Java Spring Boot application'unu dockerla ayağa kaldırabilirsin.
+DataTable componenti responsive değil.
 
 ## Tech Stack
 
