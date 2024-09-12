@@ -1,17 +1,16 @@
 "use client"
 import React, { useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import LabeledInput from './LabeledInput';
-import UIImage from '../Image';
-import FormButton from './FormButton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import LabeledInput from '../LabeledInput';
+import UIImage from '../../Image';
+import FormButton from '../FormButton';
 import Link from 'next/link';
 import * as yup from "yup";
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import Cookies from 'js-cookie';
-import { AuthContext } from '../AuthContext/AuthProvider';
+import { AuthContext } from '../../AuthContext/AuthProvider';
 
 const digitsOnly = (value) => /^\d{10}$/.test(value)
 

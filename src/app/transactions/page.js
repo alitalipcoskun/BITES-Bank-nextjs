@@ -1,56 +1,49 @@
 "use client"
-import PageTemplate from '@/components/PageComponents/PageTemplate'
+import PageTemplate from '@/components/DefaultPage/PageTemplate'
 import axios from 'axios';
-import React, {useCallback, useEffect, useState} from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { useAuthContext } from '@/components/AuthContext/AuthProvider';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { useForm } from 'react-hook-form';
-import { userAgent } from 'next/server';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
 import Cookies from 'js-cookie';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import TransactionForm from '@/components/Form/Transaction/TransactionForm';
 
-const digitsOnly = (value) => /^\d{10}$/.test(value)
 
-const positiveOnly = (value) => {
-  return (float(value) > 0) ? false : true;
-}
 
-const schema = yup.object({
-  fromAcc: yup.string("Account no format is all decimal with 10 length").test("Digits only", "This field should have only decimals with length of 10.", digitsOnly),
-  toAcc: yup.string("Account no format is all decimal with 10 length").required("Surname is required").test("Digits only", "This field should have only decimals with length of 10.", digitsOnly),
-  balanceChange: yup.number().required("Balance change is required").test("Positive Check", "This field must be positive.", positiveOnly),
-});
+
 
 
 const TransactionsPage = (props) => {
-  // Library allows control and give feedback to user precisely.
-  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({ resolver: yupResolver(schema) });
+
   const token = Cookies.get("jwt");
-  const {login, user, axiosInstance} = useAuthContext();
+  const { login, user, axiosInstance } = useAuthContext();
   const [transactions, setTransactions] = useState(undefined);
+
+
+
+
+
   const fetchUser = useCallback(async () => {
-      try {
-        axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
-  
-        const response = await axiosInstance.post(
-          '/api/v1/user/profile',
-          { token: token }
-        );
-        console.log(response);
-        // Errors will thrown with respect to the response status.
-        if (token === undefined) {
-          router.push("/login");
-        }
-        login(response.data);
-        console.log(response.data);
+    try {
+      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+
+      const response = await axiosInstance.post(
+        '/api/v1/user/profile',
+        { token: token }
+      );
+      console.log(response);
+      // Errors will thrown with respect to the response status.
+      if (token === undefined) {
+        router.push("/login");
       }
-      catch (error) {
-        const errMsg = validateStatus(error);
-        setCreationError(errMsg.label, errMsg.value);
-      }
+      login(response.data);
+      console.log(response.data);
+    }
+    catch (error) {
+      const errMsg = validateStatus(error);
+      setCreationError(errMsg.label, errMsg.value);
+    }
   }, [token]);
   const fetchTransactions = useCallback(async () => {
     try {
@@ -73,7 +66,7 @@ const TransactionsPage = (props) => {
       validate
       console.log(response);
       setTransactions(response.data);
-      
+
     }
     catch (error) {
       console.log(error);
@@ -82,21 +75,42 @@ const TransactionsPage = (props) => {
 
 
   useEffect(() => {
-
+    //onChange={(e) => 
+    //  setTransactionData((prev) => {
+    //    return {
+    //      ...prev,
+    //      fromAcc: e.target.value
+    //    };
+    //  })
+    //}
     fetchUser();
-    console.log(user);
   }, [fetchUser]);
+
+
+
   return (
     <PageTemplate>
-      <div className = "flex flex-col w-screen h-screen justify-center text-center">
-      {user === undefined ? <Skeleton></Skeleton>:<select className="w-72" {...register("fromAcc", { required: true })} placeholder="" disabled={isSubmitting}>
-                {user["accounts"].map((item, idx) => {
-                    return <option value={item} key={idx}>{item}</option>
-                })}
-            </select>}
-            <Input {...register("toAcc", {required: true})} placeholder="" disabled={isSubmitting}></Input>
-            <Input {...register("balanceChange", {required: true})} disabled={isSubmitting} ></Input>
-        {transactions && transactions}
+      <div className="flex flex-col h-screen justify-center text-center">
+        <Card className="container w-fit sm:w-[40vw] m-auto">
+          <CardHeader>Transactions</CardHeader>
+          <CardContent>
+            {user === undefined ?
+              <>
+                <Skeleton className="w-72 sm:h-10 sm:w-80 mb-2" />
+                <Skeleton className="h-10 w-[225px] mb-2" />
+                <Skeleton className="h-8 w-[200px] mb-2" />
+                <Skeleton className="h-8 w-[200px]" />
+              </>
+              :
+              <>
+              <TransactionForm accounts={user.accounts} />
+              {transactions && transactions}
+              </>
+            }
+          
+          </CardContent>
+        </Card>
+
       </div>
     </PageTemplate>
   )

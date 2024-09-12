@@ -1,8 +1,8 @@
 "use client"
 import { AuthContext } from '@/components/AuthContext/AuthProvider';
-import Footer from '@/components/FooterFiles/Footer'
+import Footer from '@/components/Footer/Footer'
 import UIImage from '@/components/Image'
-import PageContainer from '@/components/PageComponents/PageContainer'
+import PageContainer from '@/components/DefaultPage/PageContainer'
 import { Spinner } from '@/components/ui/spinner';
 import Cookies from 'js-cookie';
 import Link from 'next/link'

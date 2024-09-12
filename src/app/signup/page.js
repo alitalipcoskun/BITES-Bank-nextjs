@@ -1,6 +1,6 @@
 
-import SignUpForm from '@/components/Form/SignUpForm'
-import PageContainer from '@/components/PageComponents/PageContainer'
+import SignUpForm from '@/components/Form/Signup/SignUpForm'
+import PageContainer from '@/components/DefaultPage/PageContainer'
 import React from 'react'
 
 const SignUpPage = () => {

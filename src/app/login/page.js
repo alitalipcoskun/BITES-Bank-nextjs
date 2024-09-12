@@ -1,6 +1,6 @@
-import LoginForm from '@/components/Form/LoginForm'
-import PageContainer from '@/components/PageComponents/PageContainer'
-import PageTemplate from '@/components/PageComponents/PageTemplate'
+
+import LoginForm from '@/components/Form/Login/LoginForm'
+import PageContainer from '@/components/DefaultPage/PageContainer'
 import React from 'react'
 
 const Page = () => {

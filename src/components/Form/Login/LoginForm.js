@@ -1,16 +1,16 @@
 "use client"
 import React, {useContext, useEffect, useState} from 'react';
 import { useForm } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import LabeledInput from './LabeledInput';
-import UIImage from '../Image';
-import FormButton from './FormButton';
-import PageContainer from '../PageComponents/PageContainer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
+import LabeledInput from '../LabeledInput';
+import UIImage from '../../Image';
+import FormButton from '../FormButton';
+import PageContainer from '../../DefaultPage/PageContainer';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
-import { Spinner } from '../ui/spinner';
-import { AuthContext } from '../AuthContext/AuthProvider';
+import { Spinner } from '../../ui/spinner';
+import { AuthContext } from '../../AuthContext/AuthProvider';
 
 
 // It is the input fields that is required to give authorization to user.

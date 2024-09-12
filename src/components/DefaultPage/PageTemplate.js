@@ -1,6 +1,6 @@
 import React from 'react'
-import Navbar from '../NavbarFiles/Navbar'
-import Footer from '../FooterFiles/Footer'
+import Navbar from '../Navbar/Navbar'
+import Footer from '../Footer/Footer'
 
 const PageTemplate = (props) => {
     //Kullanıcı giriş yapmış mı yapmamış mı diye kontrol eden mekanizmayı buraya koyabilirim.
