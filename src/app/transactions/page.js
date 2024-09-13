@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import TransactionForm from '@/components/Form/Transaction/TransactionForm';
+import { TransactionColumns } from './TransactionColumns';
+import Table from '@/components/Table/Table';
 
 
 
@@ -18,6 +20,10 @@ const TransactionsPage = (props) => {
   const token = Cookies.get("jwt");
   const { login, user, axiosInstance } = useAuthContext();
   const [transactions, setTransactions] = useState(undefined);
+
+  const [selectedItem, setSelectedItem] = useState(undefined);
+  const [phone, setPhone] = useState("");
+  const [accountNo, setAccountNo] = useState("");
 
 
 
@@ -38,6 +44,7 @@ const TransactionsPage = (props) => {
         router.push("/login");
       }
       login(response.data);
+      setPhone(response.data.phone);
       console.log(response.data);
     }
     catch (error) {
@@ -57,6 +64,10 @@ const TransactionsPage = (props) => {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          body: {
+            phoneNumber: phone,
+            accountNo: accountNo
+          }
         }
       );
       // Errors will thrown with respect to the response status.
@@ -66,12 +77,18 @@ const TransactionsPage = (props) => {
       validate
       console.log(response);
       setTransactions(response.data);
+      console.log(response);
 
     }
     catch (error) {
       console.log(error);
     }
-  }, [token]);
+  }, [token, accountNo]);
+
+  const setSearchAccount = (account) => {
+    console.log(account);
+    setAccountNo(account);
+  }
 
 
   useEffect(() => {
@@ -83,7 +100,9 @@ const TransactionsPage = (props) => {
     //    };
     //  })
     //}
+    console.log(accountNo);
     fetchUser();
+    fetchTransactions();
   }, [fetchUser]);
 
 
@@ -103,14 +122,23 @@ const TransactionsPage = (props) => {
               </>
               :
               <>
-              <TransactionForm accounts={user.accounts} />
-              {transactions && transactions}
+                <TransactionForm 
+                accounts={user.accounts}
+                accountNo={accountNo}
+                setAccountNo={setSearchAccount}
+                />
+                <Table
+                  columns={TransactionColumns}
+                  data={transactions}
+                  setSelectedItem={setSelectedItem}
+                  selectedItem={selectedItem}
+                />
               </>
+
             }
-          
+
           </CardContent>
         </Card>
-
       </div>
     </PageTemplate>
   )

@@ -30,12 +30,22 @@ const BalanceForm = (props, setBalanceDialog) => {
             axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
             const response = await axiosInstance.post("/api/v1/account/add-balance", {
                 "accountNo": payload.accountNo,
+                "cardNumber": payload.cardNumber.toString(),
+                "expirationDate": payload.expirationDate,
                 "balanceChange": parseFloat(payload.amount)
             });
             console.log(response);
 
         } catch (error) {
             console.log(error);
+            if(error.status == 406){
+                setError("cardNumber",
+                    {message: error.response.data.message}
+                )
+            }
+            setError("root", 
+                {message: error.response.data.message}
+            )
         }
     }
 
@@ -53,6 +63,28 @@ const BalanceForm = (props, setBalanceDialog) => {
                 onChange={(e) => changeHandler("accountNo", e.target.value)}
                 value={watch("accountNo")}
             />
+            <div className='mt-4'>
+                <LabeledInput
+                    type={"number"}
+                    label={"Enter the card number:"}
+                    register={register}
+                    errors={errors}
+                    isSubmitting={isSubmitting}
+                    name={"cardNumber"}
+                    value={watch("cardNumber")}
+                />
+            </div>
+            <div className='mt-4'>
+                <LabeledInput
+                    type={"text"}
+                    label={"Enter expiration date of the card."}
+                    register={register}
+                    errors={errors}
+                    isSubmitting={isSubmitting}
+                    name={"expirationDate"}
+                    value={watch("expirationDate")}
+                />
+            </div>
             <div className='mt-4'>
                 <LabeledInput
                     type={"number"}
