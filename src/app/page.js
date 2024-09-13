@@ -106,6 +106,7 @@ export default function Home() {
       const response = await axiosInstance.post("/api/v1/account/new-account", {
         "money_type": payload.account_type
       });
+      
       setCreatedAcc(response.data);
 
     } catch (error) {

@@ -30,7 +30,7 @@ const CreateAccForm = (props) => {
         <form onSubmit={handleSubmit(onSubmit)}>
             <select className="w-72" {...register("account_type", { required: true })} placeholder="" disabled={isSubmitting}>
                 {accOptions.map((item, idx) => {
-                    return <option value={item.value} key={idx}>{item.name}</option>
+                    return <option value={item.type} key={idx}>{item.name}</option>
                 })}
             </select>
             {errors.root && <p className="text-red-500">{errors.root.message}</p>}

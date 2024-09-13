@@ -30,7 +30,6 @@ const ProfileForm = (props) => {
         try{
             axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
-            console.log(payload);
             const response = await axiosInstance.post("/api/v1/user/change-password", {
                 "currentPassword": payload.password,
                 "newPassword": payload.newPassword
@@ -39,6 +38,9 @@ const ProfileForm = (props) => {
             console.log(response);
         }catch(error){
             console.log(error);
+            setError("root", 
+                {message: error.response.data.message}
+            )
         }
     }
 

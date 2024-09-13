@@ -61,7 +61,7 @@ differently or not.
 
 ## User Authentication and Authorization in React
 
-![alt text](readme_images/react_auth_diagram.png)
+<img src="(readme_images/react_auth_diagram.png" width="50%" height="auto" alt="Screenshot">
 
 The diagram simply explains what happened and what to expect from a backend service and a React application. It may also be said as traditional life cycle of a product.
 
