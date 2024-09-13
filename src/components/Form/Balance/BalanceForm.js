@@ -9,8 +9,9 @@ import LabeledInput from '../LabeledInput';
 import Cookies from 'js-cookie';
 import { AuthContext } from '@/components/AuthContext/AuthProvider';
 
+const errorClass = "border border-red-500 bg-red-100 text-red-900 placeholder-red-500 p-2 rounded"
 const BalanceForm = (props, setBalanceDialog) => {
-    const {axiosInstance} = useContext(AuthContext);
+    const { axiosInstance } = useContext(AuthContext);
     const { accounts } = props;
 
     const token = Cookies.get("jwt");

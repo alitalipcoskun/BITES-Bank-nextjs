@@ -7,7 +7,6 @@ import { profileFormLabels } from './ProfileFormLabels';
 import FormButton from '../FormButton';
 import Cookies from 'js-cookie'
 
-import { useRouter } from 'next/navigation';
 
 
 
@@ -16,9 +15,6 @@ import { useRouter } from 'next/navigation';
 
 
 const ProfileForm = (props) => {
-
-    const router = useRouter();
-
     const token= Cookies.get("jwt");
     const { user, axiosInstance } = props;
 

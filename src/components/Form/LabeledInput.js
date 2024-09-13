@@ -1,14 +1,14 @@
 import React from 'react'
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
-import { list } from 'postcss';
-const LabeledInput = (props) => {
-    const { label, type, register, ruleSet, name, errors, isSubmitting,className} = props;
 
-    const errorClass = "border border-red-500 color-red-500 bg-red-200"
-    
-    const containerClass = className ? `grid w-full items-center gap-1.5 mb-3 "mt-8"${className}`:  "grid w-full items-center gap-1.5 mb-3" 
-    
+const LabeledInput = (props) => {
+    const { label, type, register, ruleSet, name, errors, isSubmitting, className } = props;
+
+    const errorClass = "border border-red-500 color-red-500 bg-red-200 w-[50vh]"
+
+    const containerClass = className ? `m-auto ${className}` : "m-auto"
+
     return (
         <div className={containerClass}>
             <Label
@@ -20,14 +20,14 @@ const LabeledInput = (props) => {
                 id={label}
                 placeholder={props.placeholder}
                 {...register(name, ruleSet)}
-                className={errors[`${name}`] ? errorClass : ""}
+                className={errors[`${name}`] ? errorClass : "w-[50vh] mb-4"}
                 disabled={isSubmitting}
                 {...props}
 
             />
             {errors[`${name}`] &&
-                <p className="text-red-500">
-                    {errors[`${name}`].message}
+                <p className={`inline text-red-500 ${errors[`${name}`] ? 'visible' : 'invisible'}`}>
+                    {errors[`${name}`].message || "Placeholder"}
                 </p>}
         </div>
     )

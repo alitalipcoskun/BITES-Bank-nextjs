@@ -6,6 +6,7 @@ Database'i dockerda ayağa kaldırabilirsin.
 Java Spring Boot application'unu dockerla ayağa kaldırabilirsin.
 DataTable componenti responsive değil.
 Login screende şifreyi yanlış girince girdi alanları kırmızı olmuyor.
+Anasayfadaki para ekleme kısmında dropdown menünün hatayı yakalama durumundaki reaksiyonu kontrol edilecek.
 
 ## Tech Stack
 

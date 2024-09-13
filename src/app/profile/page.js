@@ -60,8 +60,6 @@ const ProfilePage = () => {
                             <Skeleton className="h-10 w-[225px] mb-2" />
                             <Skeleton className="h-8 w-[200px] mb-2" />
                             <Skeleton className="h-8 w-[200px]" />
-
-
                         </>) :
                             (
                                 <>
