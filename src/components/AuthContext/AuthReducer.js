@@ -1,5 +1,5 @@
 
-import React from 'react'
+import {useMemo} from 'react'
 
 
 // AuthReducer is for changing the current context for different tasks. For authentication case,
@@ -28,11 +28,12 @@ const AuthReducer = (state, action) => {
             return {
                 ...state,
                 isAuthenticated: true,
+                token: action.payload.token
             }
 
         default:
             return state
     }
-}
+};
 
 export default AuthReducer;

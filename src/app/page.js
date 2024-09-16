@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useCallback, useContext, useState } from "react";
 import Cookies from 'js-cookie';
-import { AuthContext } from "@/components/AuthContext/AuthProvider";
+import { AuthContext, useAuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import PageTemplate from "@/components/DefaultPage/PageTemplate";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "primereact/dialog";
 import { useErrorBoundary } from "react-error-boundary";
 import BalanceForm from "@/components/Form/Balance/BalanceForm";
+import { set } from "react-hook-form";
 
 
 
@@ -21,10 +22,7 @@ export default function Home() {
   const { showBoundary } = useErrorBoundary();
 
   // Axios configuration.
-  const { login, user, axiosInstance } = useContext(AuthContext);
-  const token = Cookies.get("jwt");
-  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-  axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+  const { user, axiosInstance, token, checkToken, LoginUser } = useAuthContext();
 
   // Routing unauthorized users.
   const router = useRouter();
@@ -38,6 +36,7 @@ export default function Home() {
   // User phone number state
   const [userPhone, setUserPhone] = useState("");
 
+  const [loadingState, setLoadingState] = useState(true);
   // It is used in Table component and delete operation to provide information to user and making delete operation.
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -54,40 +53,6 @@ export default function Home() {
     create: false,
     balance: false
   });
-
-
-  // Performs post operation to get user information from the backend service.
-  const fetchUser = useCallback(async () => {
-    try {
-      const response = await axiosInstance.post(
-        '/api/v1/user/profile',
-        { token: token }
-      );
-
-      // Errors will thrown with respect to the response status.
-      if (token === undefined) {
-        router.push("/login");
-      }
-
-      // Goes to context and updates user information
-      login(response.data);
-      // Sets user mobile phone
-      setUserPhone(response.data.phone);
-      // Performs fetch operation to get the account information of the current session.
-      fetchAccounts(response.data.phone);
-      // Verifies that there is no error on root, clears them.
-      setError("root", undefined);
-    }
-
-    catch (error) {
-      setError("root", {
-        message: error.response.data.message
-      });
-      // Crucial error, user should not be able to see the page.
-      showBoundary(error.reponse.data.message);
-    }
-  }, [token, createdAcc]);
-
 
   // Performs get operation to reach to account information of the user.
   const fetchAccounts = useCallback(async (phone) => {
@@ -108,74 +73,119 @@ export default function Home() {
       // Set accounts to response data to display it on the screen
       setAccounts(response.data);
       // Verifies that there is no error on the account, clears them.
-      setError("account", undefined);
+      setError(prev => ({ ...prev, account: undefined }));
     }
     catch (error) {
-      // Catches error and displays it.
-      setError("account", {
-        message: error.response.data.message
-      });
+      // Handle the error appropriately, e.g., set an error message
+      setError(prev => ({ ...prev, account: { message: "Failed to fetch accounts" } }));
     }
-  }, [token, userPhone]);
+  }, [token, userPhone, axiosInstance, router]);
+
+  // Performs post operation to get user information from the backend service.
+  const fetchUser = useCallback(async () => {
+    try {
+      if(token === undefined || token === null){
+        router.push("/login");
+        return;
+      }
+      const response = await axiosInstance.post(
+        '/api/v1/user/profile',
+        { token: token }
+      );
+
+      // Errors will thrown with respect to the response status.
+      if (token === undefined) {
+        router.push("/login");
+        return;
+      }
+      LoginUser(response.data);
+      // Sets user mobile phone
+      setUserPhone(response.data.phone);
+      // Performs fetch operation to get the account information of the current session.
+      fetchAccounts(response.data.phone);
+      // Verifies that there is no error on root, clears them.
+      setError(prev => ({ ...prev, root: undefined }));
+    } catch (error) {
+      console.log(error);
+      console.log("Entered catch block");
+      // Handle the error appropriately
+      setError(prev => ({ ...prev, root: { message: "Failed to fetch user profile" } }));
+      // Crucial error, user should not be able to see the page.
+      showBoundary(error);
+      router.push("/login");
+      setLoadingState(false);
+    }
+  }, [token, router, LoginUser, fetchAccounts, showBoundary, axiosInstance]);
 
 
   useEffect(() => {
+    setLoadingState(true);
+    checkToken();
     // Perfom get and post operation for user profile and account informations nested.
     fetchUser();
+    // Set a timeout to redirect if loading takes too long
+    const redirectTimeout = setTimeout(() => {
+      if (loadingState) {
+        checkToken();
+        console.log(token);
+        if(token === undefined || token === null){
+          console.log("Loading timeout reached. Redirecting to login.");
+          router.push("/login");
+          return;
+      }
+      fetchUser();
+      setLoadingState(false);
+    }}, 10000);
+    setLoadingState(false);
+    return () => clearTimeout(redirectTimeout);
 
-  }, [fetchUser, fetchAccounts]);
+  }, [fetchUser, checkToken, router]);
 
+  useEffect(() => {
+    if (!loadingState && user) {
+      setLoadingState(false);
+    }
+  }, [loadingState, user]);
 
 
   // Performs post operation to create account for the current session.
   const onSubmit = async (payload) => {
     console.log(payload);
     try {
-      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
       const response = await axiosInstance.post("/api/v1/account/new-account", {
         "money_type": payload.account_type
       });
       // For displaying feedback to the user
       setCreatedAcc(response.data);
       // Verify that operation performed correctly. Clears previous errors about create operation.
-      setError("create", undefined);
-
+      setError(prev => ({ ...prev, create: undefined }));
+      // Refresh accounts after creating a new one
+      fetchAccounts(userPhone);
     } catch (error) {
-      setError("create",
-        { message: error.response.data.message }
-      );
+      setError(prev => ({ ...prev, create: { message: "Failed to create account" } }));
     }
   }
 
   const onDelete = async () => {
     try {
-      setDialog((prev) => {
-        return {
-          ...prev,
-          delete: true
-        }
-      });
-      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
+      setDialog(prev => ({ ...prev, delete: true }));
       const response = await axiosInstance.post("/api/v1/account/delete-account", {
         "no": selectedItem.no
       });
 
-      setError("root", undefined);
+      setError(prev => ({ ...prev, root: undefined }));
       fetchAccounts(userPhone);
     } catch (error) {
-      setError("root",
-        { message: error.response.data.message });
+      setError(prev => ({ ...prev, root: { message: "Failed to delete account" } }));
     }
   }
 
   return (
     <>
       <PageTemplate>
-        {user === undefined ?
+        {loadingState ?
           (<Spinner className="m-auto"></Spinner>) :
-          (!user ? "Redirecting.." :
+          ((user === null || user === undefined) ? "Redirecting.." :
             <div className="flex flex-col w-screen h-screen text-center justify-center">
               <Card className="shadow-xl flex flex-col w-[80vw] sm:w-fit h-fit justify-center text-left m-auto container">
                 <CardTitle className="container py-4 px-6 text-left">

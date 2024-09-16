@@ -9,31 +9,22 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import TransactionForm from '@/components/Form/Transaction/TransactionForm';
 import { TransactionColumns } from './TransactionColumns';
 import Table from '@/components/Table/Table';
-
-
-
-
-
+import { useRouter } from 'next/navigation';
 
 const TransactionsPage = (props) => {
-
-  const token = Cookies.get("jwt");
-  const { login, user, axiosInstance } = useAuthContext();
+  const { LoginUser, axiosInstance, checkToken, token } = useAuthContext();
   const [transactions, setTransactions] = useState(undefined);
-
+  const [creationError, setCreationError] = useState({"root": undefined});
   const [selectedItem, setSelectedItem] = useState(undefined);
   const [phone, setPhone] = useState("");
   const [accountNo, setAccountNo] = useState("");
+  const [loadingState, setLoadingState] = useState(true);
+  const [userAccounts, setUserAccounts] = useState([]);
 
-
-
-
+  const router = useRouter();
 
   const fetchUser = useCallback(async () => {
     try {
-      axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
-
       const response = await axiosInstance.post(
         '/api/v1/user/profile',
         { token: token }
@@ -43,16 +34,22 @@ const TransactionsPage = (props) => {
       if (token === undefined) {
         router.push("/login");
       }
-      login(response.data);
+      LoginUser(response.data);
       setPhone(response.data.phone);
+      setUserAccounts(response.data.accounts || []);
       console.log(response.data);
     }
     catch (error) {
-      const errMsg = validateStatus(error);
-      setCreationError(errMsg.label, errMsg.value);
+      setCreationError((prev) => {
+        return {
+          ...prev,
+          "root": error.message
+        }
+      });
     }
-  }, [token]);
-  const fetchTransactions = useCallback(async () => {
+  }, [token, LoginUser, axiosInstance, router]);
+
+  const fetchTransactions = useCallback(async (account) => {
     try {
       // Create an accountNo parameter and set as null at the beginning of the page.
       // If account is not selected, do not send request to the database.
@@ -66,7 +63,7 @@ const TransactionsPage = (props) => {
           },
           body: {
             phoneNumber: phone,
-            accountNo: accountNo
+            accountNo: account
           }
         }
       );
@@ -74,7 +71,6 @@ const TransactionsPage = (props) => {
       if (token === undefined) {
         router.push("/login");
       }
-      validate
       console.log(response);
       setTransactions(response.data);
       console.log(response);
@@ -83,29 +79,46 @@ const TransactionsPage = (props) => {
     catch (error) {
       console.log(error);
     }
-  }, [token, accountNo]);
+  }, [token, accountNo, phone, router]);
 
-  const setSearchAccount = (account) => {
-    console.log(account);
-    setAccountNo(account);
+  const setSearchAccount = async (account) => {
+    try{
+      const response = await axiosInstance.get("/api/v1/account/search-account-owner", {
+        "no": account
+      });
+
+    }catch(error){
+
+    }
+    
   }
 
-
   useEffect(() => {
-    //onChange={(e) => 
-    //  setTransactionData((prev) => {
-    //    return {
-    //      ...prev,
-    //      fromAcc: e.target.value
-    //    };
-    //  })
-    //}
-    console.log(accountNo);
+    setLoadingState(true);
+    checkToken();
+    if(token === undefined || token === null){
+      router.push("/login");
+    }
+    // Perfom get and post operation for user profile and account informations nested.
     fetchUser();
-    fetchTransactions();
-  }, [fetchUser]);
+    // Set a timeout to redirect if loading takes too long
+    const redirectTimeout = setTimeout(() => {
+      if (loadingState) {
+        checkToken();
+        console.log(token);
+        if(token === undefined || token === null){
+          console.log("Loading timeout reached. Redirecting to login.");
+          router.push("/login");
+          return;
+        }
+        fetchUser();
+        setLoadingState(false);
+      }
+    }, 10000); // 10 seconds timeout
+    setLoadingState(false);
+    return () => clearTimeout(redirectTimeout);
 
-
+  }, [fetchUser, checkToken, router, token, loadingState]);
 
   return (
     <PageTemplate>
@@ -113,7 +126,7 @@ const TransactionsPage = (props) => {
         <Card className="container w-fit sm:w-[40vw] m-auto">
           <CardHeader>Transactions</CardHeader>
           <CardContent>
-            {user === undefined ?
+            {loadingState ?
               <>
                 <Skeleton className="w-72 sm:h-10 sm:w-80 mb-2" />
                 <Skeleton className="h-10 w-[225px] mb-2" />
@@ -123,7 +136,7 @@ const TransactionsPage = (props) => {
               :
               <>
                 <TransactionForm 
-                accounts={user.accounts}
+                accounts={userAccounts}
                 accountNo={accountNo}
                 setAccountNo={setSearchAccount}
                 />
@@ -134,9 +147,7 @@ const TransactionsPage = (props) => {
                   selectedItem={selectedItem}
                 />
               </>
-
             }
-
           </CardContent>
         </Card>
       </div>

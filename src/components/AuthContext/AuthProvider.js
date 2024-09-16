@@ -1,7 +1,8 @@
 "use client"
-import React, { createContext, useReducer, useContext } from 'react'
+import React, { createContext, useReducer, useContext, useCallback, useMemo } from 'react'
 import AuthReducer from './AuthReducer'
-const { default: axios } = require("axios");
+import Cookies from 'js-cookie';
+const { default: axios, HttpStatusCode } = require("axios");
 
 
 
@@ -24,7 +25,8 @@ export const AuthContext = createContext({
 const initialState = {
   isAuthenticated: null,
   user: undefined,
-  cookieFlag: undefined
+  cookieFlag: undefined,
+  token: Cookies.get("jwt") || null
 };
 
 
@@ -32,8 +34,76 @@ const initialState = {
 export const AuthProvider = (props) => {
 
   const [state, dispatchAuth] = useReducer(AuthReducer, initialState);
+  const axiosInstance = useMemo(() => {
+    const instance = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      validateStatus: function (status) {
+        return status < HttpStatusCode.InternalServerError;
+      }
+    });
 
-  const ValidateStatus = (response) => {
+    instance.interceptors.request.use((config) => {
+      if (state.token) {
+        config.headers.Authorization = `Bearer ${state.token}`
+      }
+      return config;
+    }, (error) => {
+      return Promise.reject(error);
+    });
+
+    return instance;
+  }, []);
+
+  const LoginUser = useCallback((userData) => {
+    dispatchAuth({ type: "LOGIN", payload: userData });
+  }, [dispatchAuth]);
+
+  const LogoutUser = useCallback(() => {
+    dispatchAuth({ type: "LOGOUT" });
+  }, [dispatchAuth]);
+
+  const SetAuthenticated = useCallback(() => {
+    dispatchAuth({ type: "AUTHENTICATE", payload: true })
+  }, [dispatchAuth]);
+
+
+  const login = useCallback(async (userData) => {
+    console.log(userData);
+    const response = await axiosInstance.post("/api/v1/auth/authenticate",
+      {
+        "phone": userData.phone,
+        "password": userData.password
+      }
+    );
+    if (response.data.token) {
+      Cookies.set("jwt", response.data.token);
+      LoginUser({ type: "AUTHENTICATE", payload: { token: response.data.token } })
+    } else {
+      throw new Error("Authentication error occured!");
+    }
+  }
+    , [axiosInstance]);
+
+  const logout = useCallback(() => {
+    Cookies.remove("jwt");
+    dispatchAuth({ type: "LOGOUT" });
+  }, [dispatchAuth]);
+
+
+  const checkToken = useCallback(() => {
+    const token = Cookies.get("jwt");
+    console.log(token);
+    if (token) {
+      dispatchAuth({ type: "AUTHENTICATE", payload: { token: token } });
+    } else {
+      logout();
+    }
+  }, [dispatchAuth]);
+
+
+
+
+  const ValidateStatus = useCallback((response) => {
     switch (response.status) {
       case 401:
         return { label: "root", value: { type: "custom", message: response.response.data.message } }
@@ -46,26 +116,30 @@ export const AuthProvider = (props) => {
       default:
         break;
     }
-  };
-
-  const LoginUser = (userData) => {
-    dispatchAuth({ type: "LOGIN", payload: userData });
-  };
-
-  const LogoutUser = () => {
-    dispatchAuth({ type: "LOGOUT" });
-  };
-
-  const SetAuthenticated = () => {
-    dispatchAuth({ type: "AUTHENTICATE", payload: true })
-  };
-
-  const axiosInstance = axios.create({
-    baseURL: 'http://127.0.0.1:8080'
-  });
+  }, []);
 
 
-  return <AuthContext.Provider value={{ ...state, login: LoginUser, logout: LogoutUser, setAuthenticated: SetAuthenticated, validateStatus: ValidateStatus, axiosInstance: axiosInstance }}>
+
+
+
+
+
+  const contextValue = useMemo(() => {
+    return {
+      ...state,
+      login: login,
+      logout: logout,
+      axiosInstance: axiosInstance,
+      LoginUser: LoginUser,
+      LogoutUser: LogoutUser,
+      SetAuthenticated: SetAuthenticated,
+      checkToken: checkToken,
+
+    }
+  })
+
+  return <AuthContext.Provider
+    value={contextValue}>
     {props.children}
   </AuthContext.Provider>
 }

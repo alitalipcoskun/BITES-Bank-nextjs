@@ -1,77 +1,85 @@
 "use client"
 import PageTemplate from '@/components/DefaultPage/PageTemplate'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import React, { useEffect, useCallback, useContext, useState } from 'react'
-import { AuthContext, useAuthContext } from '../../components/AuthContext/AuthProvider';
+import React, { useEffect, useCallback, useState } from 'react'
+import { useAuthContext } from '../../components/AuthContext/AuthProvider';
 import Cookies from 'js-cookie';
-import axios from 'axios';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProfileForm from '@/components/Form/Profile/ProfileForm';
-
+import { useRouter } from 'next/navigation';
+import { useErrorBoundary } from 'react-error-boundary';
 
 const ProfilePage = () => {
-    const { user, login } = useAuthContext();
     const [token, setToken] = useState(Cookies.get("jwt"));
+    const [error, setError] = useState({ "root": undefined });
+    const [loadingState, setLoadingState] = useState(true);
+    const [profileData, setProfileData] = useState(null);
 
-    const { axiosInstance } = useContext(AuthContext);
+    const router = useRouter();
+    const { axiosInstance, LoginUser, user } = useAuthContext();
+    const { showBoundary } = useErrorBoundary();
 
-    console.log(user);
     const fetchUser = useCallback(async () => {
         try {
-            const response = await axios.post(
-                'http://127.0.0.1:8080/api/v1/user/profile',
-                { token: token },
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-            // Errors will thrown with respect to the response status.
-            if (token === undefined) {
+            if (!token) {
                 router.push("/login");
+                return;
             }
-            login(response.data);
+            const response = await axiosInstance.post(
+                '/api/v1/user/profile',
+                { token: token }
+            );
+            LoginUser(response.data);
+            setProfileData(response.data);
+            setError(prev => ({ ...prev, root: undefined }));
+        } catch (error) {
+            // Handle the error appropriately
+            setError(prev => ({ ...prev, root: { message: "Failed to fetch user profile" } }));
+            // Crucial error, user should not be able to see the page.
+            showBoundary(error);
+            router.push("/login");
+        } finally {
+            setLoadingState(false);
         }
-        catch (error) {
-            console.log(error);
-        }
-    }, [token]);
-
-
+    }, [token, router, LoginUser, axiosInstance, showBoundary]);
 
     useEffect(() => {
-
-        fetchUser();
-        if (token === null || token === undefined) {
-            router.push("/");
+        if (!token) {
+            router.push("/login");
+            return;
         }
-    }, [fetchUser]);
+        fetchUser();
+    }, [fetchUser, token, router]);
+
+    const displayName = profileData ? `${profileData.name} ${profileData.surname}` : '';
 
     return (
         <PageTemplate>
             <div className="flex flex-col justify-center align-middle w-screen h-screen text-center">
                 <Card className="flex flex-col justify-center align-middle text-left w-[80vw] sm:w-fit h-fit m-auto">
-                    <CardHeader className="font-bold">{user === undefined ? (<Skeleton className="w-72 sm:h-10 sm:w-80 mb-2" />) : (`Profile of ${user.name} ${user.surname}`)}</CardHeader>
-                    <CardContent>
-                        {user === undefined ? (<>
+                    <CardHeader className="font-bold">
+                        {loadingState ? (
                             <Skeleton className="w-72 sm:h-10 sm:w-80 mb-2" />
-                            <Skeleton className="h-10 w-[225px] mb-2" />
-                            <Skeleton className="h-8 w-[200px] mb-2" />
-                            <Skeleton className="h-8 w-[200px]" />
-                        </>) :
-                            (
-                                <>
-                                    <ProfileForm
-                                        user={user}
-                                        axiosInstance={axiosInstance}
-                                    />
-
-                                </>
-                            )
-
-                        }
+                        ) : (
+                            `Profile of ${displayName}`
+                        )}
+                    </CardHeader>
+                    <CardContent>
+                        {loadingState ? (
+                            <>
+                                <Skeleton className="w-72 sm:h-10 sm:w-80 mb-2" />
+                                <Skeleton className="h-10 w-[225px] mb-2" />
+                                <Skeleton className="h-8 w-[200px] mb-2" />
+                                <Skeleton className="h-8 w-[200px]" />
+                            </>
+                        ) : error.root ? (
+                            <p>{error.root.message}</p>
+                        ) : (
+                            <ProfileForm
+                                user={profileData}
+                                axiosInstance={axiosInstance}
+                            />
+                        )}
                     </CardContent>
                 </Card>
             </div>

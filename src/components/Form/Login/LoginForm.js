@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '../../ui/spinner';
-import { AuthContext } from '../../AuthContext/AuthProvider';
+import { AuthContext, useAuthContext } from '../../AuthContext/AuthProvider';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from './LoginSchema';
 import { logInLabels } from './LoginLabels';
@@ -23,7 +23,7 @@ import { logInLabels } from './LoginLabels';
 
 const LoginForm = (props) => {
     // AuthContext is added for updating user profile.
-    const { login, isAuthenticated, validateStatus, axiosInstance } = useContext(AuthContext);
+    const { login, isAuthenticated, validateStatus, axiosInstance } = useAuthContext();
 
     // The variable is for directing user to another page after process
     const router = useRouter();
@@ -34,36 +34,35 @@ const LoginForm = (props) => {
     // The useState is used in order to see the results of the changes in this page.
     const [jwt, setJwt] = useState(Cookies.get("jwt") !== undefined);
     const onSubmit = async (payload) => {
-        // Tries to fetch data if it is not ok, then error(s) are thrown and cought by form to give feedback to the user.
+        // Tries to fetch data if it is not ok, then error(s) are thrown and caught by form to give feedback to the user.
         try {
-            const response = await axiosInstance.post("/api/v1/auth/authenticate", {
-                "phone": payload.phone,
-                "password": payload.password
-            });
-            // If token is empty, it throws error.
-            const { token } = response.data;
-
-            // Set the JWT in cookies and authenticate
-            Cookies.set('jwt', token, { expires: 7, secure: false });
-            clearErrors("root");
-            clearErrors("phone");
-            clearErrors("password");
+            await login(payload);
+            // If login is successful, we can assume the JWT is set and user is authenticated
+            // So we can redirect to the home page
             router.push("/");
-        }
-        catch (error) {
-            console.log(error);
-            // Handle the error, display custom message using setError
-
-            // Set the error in the root if something goes wrong
+        } catch (error) {
+            console.log("Login error:", error);
+            if(error.code === "ERR_NETWORK"){
+                setError("root", {
+                    message: error.message
+                });
+                return;
+            }
+            // Set a generic error message
             setError("root", {
-                message: error.response.data.message
+                message: "Login failed. Please check your credentials and try again."
             });
-            setError("phone",
-                { message: "Phone number or password incorrect" });
 
-            setError("password",
-                { message: "Phone number or password incorrect" });
+            // Set specific error messages for phone and password fields
+            setError("phone", { message: "Phone number or password incorrect" });
+            setError("password", { message: "Phone number or password incorrect" });
 
+            // If the error has a response with a message, use it for the root error
+            if (error.response && error.response.data && error.response.data.message) {
+                setError("root", {
+                    message: error.response.data.message
+                });
+            }
         }
     }
 

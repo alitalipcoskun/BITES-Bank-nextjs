@@ -1,20 +1,20 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Dropdown } from 'primereact/dropdown';
-import React, { useContext, useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { transactionSchema } from './TransactionSchema';
 import { Input } from '@/components/ui/input';
 import FormButton from '../FormButton';
 import { Label } from '@/components/ui/label';
-import { AuthContext } from '@/components/AuthContext/AuthProvider';
+import { useAuthContext } from '@/components/AuthContext/AuthProvider';
 import Cookies from "js-cookie";
 
 
 const token = Cookies.get("jwt");
 const ACCOUNT_LENGTH = 10;
 const TransactionForm = (props) => {
-    const { axiosInstance } = useContext(AuthContext);
-    const [receiverAccOwner, setReceiverAccOwner] = useState(undefined);
+    const { axiosInstance } = useAuthContext();
+    const [receiverAccOwner, setReceiverAccOwner] = useState("");
     const { accounts, setAccountNo } = props;
 
     // Library allows control and give feedback to user precisely.
@@ -29,8 +29,6 @@ const TransactionForm = (props) => {
 
     const onSubmit = async (payload) => {
         try {
-            axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
             // Create an accountNo parameter and set as null at the beginning of the page.
             // If account is not selected, do not send request to the database.
             const response = await axiosInstance.post(
@@ -46,16 +44,13 @@ const TransactionForm = (props) => {
         }
         catch (error) {
             setError("root",
-                { message: error.response.data.message });
+                { message: error.response?.data?.message || "An error occurred" });
         }
     }
 
     const findOwner = useCallback(async () => {
-        if (watch("toAcc").length == 10) {
+        if (watch("toAcc").length === 10) {
             try {
-                axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-                axiosInstance.defaults.headers.post["Content-Type"] = 'application/json';
-
                 const response = await axiosInstance.get(
                     '/api/v1/account/account-owner',
                     {
@@ -64,20 +59,27 @@ const TransactionForm = (props) => {
                         }
                     }
                 );
+                console.log(response);
+                if(response.status !== 200){
+                    throw Error("Not found!");
+                }
                 setReceiverAccOwner(response.data);
                 clearErrors("toAcc");
             } catch (error) {
-                console.log(error.response.data.message);
-                setError("toAcc", { message: error.response.data.message });
+                console.error("Error finding owner:", error);
+                setError("toAcc", { message: "Account not found" });
+                setReceiverAccOwner("");
             }
-        } else {
+        } 
+        else {
             setReceiverAccOwner(undefined);
         }
-    }, [watch("toAcc")]);
+    }, [watch("toAcc"), getValues, axiosInstance, setError, clearErrors]);
 
 
 
     useEffect(() => {
+        console.log(errors["toAcc"]);
         findOwner();
     }, [findOwner]);
 
@@ -128,11 +130,10 @@ const TransactionForm = (props) => {
                         }}
                         value={watch("toAcc")}
                     />
-                    {/* Fixed space for the error */}
                     <p className={`text-red-500 font-bold h-4 ${errors["toAcc"] ? 'visible' : 'invisible'}`}>
-                        {errors["toAcc"]?.message || ""}
+                        {errors["toAcc"]?.message}
                     </p>
-                    {<p className={`font-bold h-4 ${receiverAccOwner ? 'visible' : 'invisible'}`}>{receiverAccOwner || ""}</p>}
+                    {<p className={`font-bold h-4 ${(receiverAccOwner && !errors["toAcc"]) ? 'visible' : 'invisible'}`}>{receiverAccOwner}</p>}
                 </div>
             </div>
 
@@ -147,7 +148,6 @@ const TransactionForm = (props) => {
                         {...register("amount", { required: true })}
                         value={watch("amount")}
                     />
-                    {/* Consistent error message space */}
                     <p className={`text-red-500 font-bold h-4 ${errors["amount"] ? 'visible' : 'invisible'}`}>
                         {errors["amount"]?.message || ""}
                     </p>
