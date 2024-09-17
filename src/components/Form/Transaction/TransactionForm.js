@@ -39,8 +39,9 @@ const TransactionForm = (props) => {
                     amount: payload.amount
                 }
             );
-
-
+            if(response.status !== 200){
+                throw Error("An error occurred");
+            }
         }
         catch (error) {
             setError("root",

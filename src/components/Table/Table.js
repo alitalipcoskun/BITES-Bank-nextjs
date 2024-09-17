@@ -1,23 +1,28 @@
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { useMediaQuery } from 'react-responsive';
 
 const Table = (props) => {
   const { columns, data, setSelectedItem, selectedItem } = props;
+  const isMobile = useMediaQuery({ maxWidth: 767 });
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full overflow-x-auto">
       <DataTable
         selectionMode="single"
         selection={selectedItem}
         value={data}
         paginator
-        rows={5}
+        rows={isMobile ? 3 : 5}
         onSelectionChange={(e) => setSelectedItem(e.value)}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rowsPerPageOptions={isMobile ? [3, 5, 10] : [5, 10, 25, 50]}
         showGridlines
         stripedRows
         removableSort
-        className="w-[80vw] sm:w-fit h-fit"
+        className="w-full"
+        scrollable
+        
+        scrollHeight="400px"
       >
         {columns.map((column, idx) => (
           <Column
@@ -26,7 +31,8 @@ const Table = (props) => {
             field={column.field}
             header={column.header}
             className="text-center"
-            style={{minWidth: '9vw'}}
+            style={{minWidth: isMobile ? '150px' : '200px'}}
+            bodyClassName="truncate"
           />
         ))}
       </DataTable>

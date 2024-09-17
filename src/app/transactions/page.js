@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 const TransactionsPage = (props) => {
   const { LoginUser, axiosInstance, checkToken, token } = useAuthContext();
   const [transactions, setTransactions] = useState(undefined);
-  const [creationError, setCreationError] = useState({"root": undefined});
+  const [creationError, setCreationError] = useState({ "root": undefined });
   const [selectedItem, setSelectedItem] = useState(undefined);
   const [phone, setPhone] = useState("");
   const [accountNo, setAccountNo] = useState("");
@@ -53,27 +53,22 @@ const TransactionsPage = (props) => {
     try {
       // Create an accountNo parameter and set as null at the beginning of the page.
       // If account is not selected, do not send request to the database.
-      const response = await axios.get(
+      console.log(account, phone);
+      const response = await axiosInstance.get(
         '/api/v1/transaction/list-transactions',
-        { token: token },
         {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: {
+          params: {
             phoneNumber: phone,
             accountNo: account
           }
         }
       );
       // Errors will thrown with respect to the response status.
-      if (token === undefined) {
-        router.push("/login");
+      if (response.status === 200) {
+        setTransactions(response.data);
+      } else {
+        setCreationError({ "root": "No transaction found" });
       }
-      console.log(response);
-      setTransactions(response.data);
-      console.log(response);
 
     }
     catch (error) {
@@ -82,21 +77,20 @@ const TransactionsPage = (props) => {
   }, [token, accountNo, phone, router]);
 
   const setSearchAccount = async (account) => {
-    try{
-      const response = await axiosInstance.get("/api/v1/account/search-account-owner", {
-        "no": account
-      });
+    try {
+      fetchTransactions(account);
+      setCreationError({ "root": undefined });
 
-    }catch(error){
-
+    } catch (error) {
+      setCreationError({ "root": error.message });
     }
-    
+
   }
 
   useEffect(() => {
     setLoadingState(true);
     checkToken();
-    if(token === undefined || token === null){
+    if (token === undefined || token === null) {
       router.push("/login");
     }
     // Perfom get and post operation for user profile and account informations nested.
@@ -106,7 +100,7 @@ const TransactionsPage = (props) => {
       if (loadingState) {
         checkToken();
         console.log(token);
-        if(token === undefined || token === null){
+        if (token === undefined || token === null) {
           console.log("Loading timeout reached. Redirecting to login.");
           router.push("/login");
           return;
@@ -135,11 +129,14 @@ const TransactionsPage = (props) => {
               </>
               :
               <>
-                <TransactionForm 
-                accounts={userAccounts}
-                accountNo={accountNo}
-                setAccountNo={setSearchAccount}
+                <TransactionForm
+                  accounts={userAccounts}
+                  accountNo={accountNo}
+                  setAccountNo={setSearchAccount}
                 />
+                <p className={`text-red-500 ${creationError.root ? "visible" : "invisible"}`}>
+                  {creationError.root}
+                </p>
                 <Table
                   columns={TransactionColumns}
                   data={transactions}
