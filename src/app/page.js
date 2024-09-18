@@ -1,7 +1,7 @@
 "use client"
-import { useEffect, useCallback, useContext, useState } from "react";
+import { useEffect, useCallback,  useState } from "react";
 import Cookies from 'js-cookie';
-import { AuthContext, useAuthContext } from "@/components/AuthContext/AuthProvider";
+import { useAuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
 import PageTemplate from "@/components/DefaultPage/PageTemplate";
@@ -13,8 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "primereact/dialog";
 import { useErrorBoundary } from "react-error-boundary";
 import BalanceForm from "@/components/Form/Balance/BalanceForm";
-import { set } from "react-hook-form";
-
 
 
 export default function Home() {
@@ -22,7 +20,10 @@ export default function Home() {
   const { showBoundary } = useErrorBoundary();
 
   // Axios configuration.
-  const { user, axiosInstance, token, checkToken, LoginUser } = useAuthContext();
+  const { user, axiosInstance, token,checkToken, LoginUser } = useAuthContext();
+
+  // State management for token
+  const [useToken, setToken] = useState(Cookies.get("jwt") !== undefined);
 
   // Routing unauthorized users.
   const router = useRouter();
@@ -84,6 +85,7 @@ export default function Home() {
   // Performs post operation to get user information from the backend service.
   const fetchUser = useCallback(async () => {
     try {
+      console.log(token);
       if(token === undefined || token === null){
         router.push("/login");
         return;
@@ -98,6 +100,7 @@ export default function Home() {
         router.push("/login");
         return;
       }
+      console.log(response.data);
       LoginUser(response.data);
       // Sets user mobile phone
       setUserPhone(response.data.phone);
@@ -125,7 +128,7 @@ export default function Home() {
     fetchUser();
     // Set a timeout to redirect if loading takes too long
     const redirectTimeout = setTimeout(() => {
-      if (loadingState) {
+      if (loadingState || !user) {
         checkToken();
         console.log(token);
         if(token === undefined || token === null){
@@ -135,7 +138,7 @@ export default function Home() {
       }
       fetchUser();
       setLoadingState(false);
-    }}, 10000);
+    }}, 5000);
     setLoadingState(false);
     return () => clearTimeout(redirectTimeout);
 

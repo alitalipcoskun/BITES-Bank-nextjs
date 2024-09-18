@@ -1,5 +1,5 @@
 "use client"
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
 import LabeledInput from '../LabeledInput';
@@ -10,7 +10,7 @@ import Link from 'next/link';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { Spinner } from '../../ui/spinner';
-import { AuthContext, useAuthContext } from '../../AuthContext/AuthProvider';
+import { useAuthContext } from '../../AuthContext/AuthProvider';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from './LoginSchema';
 import { logInLabels } from './LoginLabels';
@@ -23,7 +23,7 @@ import { logInLabels } from './LoginLabels';
 
 const LoginForm = (props) => {
     // AuthContext is added for updating user profile.
-    const { login, isAuthenticated, validateStatus, axiosInstance } = useAuthContext();
+    const { login } = useAuthContext();
 
     // The variable is for directing user to another page after process
     const router = useRouter();

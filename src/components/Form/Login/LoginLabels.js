@@ -1,4 +1,4 @@
-// YUP MUST GET IMPLEMENTED TO THIS PAGE.
+
 export const logInLabels = [
     { name: "phone", type: "number", label: "Mobile phone number", placeholder: "Your phone number 5xxxxxxxxx", ruleSet: { required: "Verify your phone number", minLength: { value: 10, message: "Phone number must have 10 characters." }, maxLength: { value: 10, message: "Phone number must have 10 characters." } } },
 
