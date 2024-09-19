@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { Toast } from 'primereact/toast'
 import 'primereact/resources/primereact.min.css'
 import 'primereact/resources/themes/lara-light-indigo/theme.css'
+import PageTemplate from '@/components/DefaultPage/PageTemplate'
 
 const Page = () => {
   const { isAuthenticated, checkToken, token } = useAuthContext();

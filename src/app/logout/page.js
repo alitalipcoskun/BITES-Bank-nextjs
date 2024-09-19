@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useCallback, useContext, useState } from 'react'
+import PageTemplate from '@/components/DefaultPage/PageTemplate';
 
 
 const LogoutPage = () => {
