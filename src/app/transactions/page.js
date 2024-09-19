@@ -51,30 +51,36 @@ const TransactionsPage = (props) => {
 
   const fetchTransactions = useCallback(async (account) => {
     try {
-      // Create an accountNo parameter and set as null at the beginning of the page.
-      // If account is not selected, do not send request to the database.
-      console.log(account, phone);
+      if (!account) {
+        console.log("No account selected");
+        return;
+      }
+
       const response = await axiosInstance.get(
         '/api/v1/transaction/list-transactions',
         {
           params: {
             phoneNumber: phone,
             accountNo: account
+          },
+          headers: {
+            Authorization: `Bearer ${token}`
           }
         }
       );
-      // Errors will thrown with respect to the response status.
-      if (response.status === 200) {
+
+      if (response.status === 200 && response.data) {
         setTransactions(response.data);
       } else {
-        setCreationError({ "root": "No transaction found" });
+        setCreationError({ "root": "No transactions found or error occurred" });
       }
 
     }
     catch (error) {
-      console.log(error);
+      console.error("Error fetching transactions:", error);
+      setCreationError({ "root": error.response?.data?.message || "Failed to fetch transactions" });
     }
-  }, [token, accountNo, phone, router]);
+  }, [axiosInstance, phone, token]);
 
   const setSearchAccount = async (account) => {
     try {

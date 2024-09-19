@@ -21,7 +21,7 @@ import { logInLabels } from './LoginLabels';
 
 
 
-const LoginForm = (props) => {
+const LoginForm = ({ onLoginSuccess, onLoginFailure, ...props }) => {
     // AuthContext is added for updating user profile.
     const { login } = useAuthContext();
 
@@ -46,6 +46,7 @@ const LoginForm = (props) => {
                 setError("root", {
                     message: error.message
                 });
+                onLoginFailure(error); // Call the onLoginFailure prop
                 return;
             }
             // Set a generic error message
@@ -63,6 +64,7 @@ const LoginForm = (props) => {
                     message: error.response.data.message
                 });
             }
+            onLoginFailure(error); // Call the onLoginFailure prop
         }
     }
 

@@ -1,13 +1,15 @@
 "use client"
 import PageTemplate from '@/components/DefaultPage/PageTemplate'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import React, { useEffect, useCallback, useState } from 'react'
+import React, { useEffect, useCallback, useState, useRef } from 'react'
 import { useAuthContext } from '../../components/AuthContext/AuthProvider';
 import Cookies from 'js-cookie';
 import { Skeleton } from '@/components/ui/skeleton';
 import ProfileForm from '@/components/Form/Profile/ProfileForm';
 import { useRouter } from 'next/navigation';
 import { useErrorBoundary } from 'react-error-boundary';
+import { Toast } from 'primereact/toast';
+
 
 const ProfilePage = () => {
     const [token, setToken] = useState(Cookies.get("jwt"));
@@ -18,6 +20,7 @@ const ProfilePage = () => {
     const router = useRouter();
     const { axiosInstance, LoginUser, user } = useAuthContext();
     const { showBoundary } = useErrorBoundary();
+    const toast = useRef(null);
 
     const fetchUser = useCallback(async () => {
         try {
@@ -53,8 +56,13 @@ const ProfilePage = () => {
 
     const displayName = profileData ? `${profileData.name} ${profileData.surname}` : '';
 
+    const showToast = (severity, summary, detail) => {
+        toast.current.show({ severity, summary, detail, life: 3000 });
+    };
+
     return (
         <PageTemplate>
+            <Toast ref={toast} />
             <div className="flex flex-col justify-center align-middle w-screen h-screen text-center">
                 <Card className="flex flex-col justify-center align-middle text-left w-[80vw] sm:w-fit h-fit m-auto">
                     <CardHeader className="font-bold">
@@ -78,6 +86,8 @@ const ProfilePage = () => {
                             <ProfileForm
                                 user={profileData}
                                 axiosInstance={axiosInstance}
+                                onSuccess={(message) => showToast('success', 'Success', message)}
+                                onError={(message) => showToast('error', 'Error', message)}
                             />
                         )}
                     </CardContent>

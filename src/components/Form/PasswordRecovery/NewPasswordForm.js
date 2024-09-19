@@ -6,7 +6,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { useAuthContext } from '@/components/AuthContext/AuthProvider';
 import { passwordSchema } from './Schema';
-import * as yup from 'yup';
 
 
 const NewPasswordForm = (props) => {
@@ -17,10 +16,14 @@ const NewPasswordForm = (props) => {
         resolver: yupResolver(passwordSchema)
     });
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         try{
-            console.log(data)
-            console.log(mail, code);
+            const response = await axiosInstance.post("/api/v1/auth/password-change",{
+                code: code,
+                mail: mail,
+                newPassword: data.password
+            })
+            
         }catch(error){
             console.log(error);
         }  

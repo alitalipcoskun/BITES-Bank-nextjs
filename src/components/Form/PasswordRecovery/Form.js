@@ -13,11 +13,9 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Toast } from 'primereact/toast';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "@/components/ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { boolean } from 'yup';
+
 import NewPasswordForm from './NewPasswordForm';
 
 const PasswordRecoveryRequest = (props) => {
