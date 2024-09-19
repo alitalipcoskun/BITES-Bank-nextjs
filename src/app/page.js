@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useCallback,  useState } from "react";
+import { useEffect, useCallback, useState } from "react";
 import Cookies from 'js-cookie';
 import { useAuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "primereact/dialog";
 import { useErrorBoundary } from "react-error-boundary";
 import BalanceForm from "@/components/Form/Balance/BalanceForm";
+
 
 
 export default function Home() {
@@ -143,6 +144,42 @@ export default function Home() {
     return () => clearTimeout(redirectTimeout);
 
   }, [fetchUser, checkToken, router]);
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    let ws;
+    const connectWebSocket = () => {
+      ws = new WebSocket('ws://localhost:8080/ws/accounts');
+
+      ws.onopen = () => {
+        console.log('WebSocket connected');
+      };
+
+      ws.onmessage = (event) => {
+        if (event.data === 'refresh') {
+          // Re-fetch account data when 'refresh' message is received
+          fetchUser();
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = (event) => {
+        console.log('WebSocket closed. Attempting to reconnect...');
+        setTimeout(connectWebSocket, 3000); // Attempt to reconnect after 3 seconds
+      };
+    };
+
+    connectWebSocket();
+
+    return () => {
+      if (ws) {
+        ws.close();
+      }
+    };
+  }, [fetchUser]);
 
   useEffect(() => {
     if (!loadingState && user) {

@@ -43,6 +43,7 @@
     "react-responsive": "^10.0.0",
     "react-transition-group": "4.4.5",
     "shadcn-ui": "^0.2.3",
+    "sockjs": "^0.3.24",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "yup": "^1.4.0",
