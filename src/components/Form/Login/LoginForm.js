@@ -92,9 +92,12 @@ const LoginForm = ({ onLoginSuccess, onLoginFailure, ...props }) => {
                         (<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center text-left" >
                             <UIImage src={"/bites_logo.jpg"} className={"mb-4"}></UIImage>
                             {logInLabels.map((label, idx) => {
-                                return <LabeledInput label={label.label} type={label.type} ruleSet={label.ruleSet} name={label.name} register={register} placeholder={label.placeholder} key={idx} errors={errors} isSubmitting={isSubmitting}></LabeledInput>
+                                return <LabeledInput 
+                                className="sm:w-[30vw] w-[50vw]"
+                                label={label.label} type={label.type} ruleSet={label.ruleSet} name={label.name} register={register} placeholder={label.placeholder} key={idx} errors={errors} isSubmitting={isSubmitting}></LabeledInput>
                             })}
                             <p>If you did not signed up yet, you can signup from <Link href="/signup" className="text-blue-500 underline">here.</Link></p>
+                            <p>If you forget your password, recover from <Link href="/forget-password" className="text-blue-500 underline">here.</Link></p>
                             <FormButton type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Login" />
                             {errors.root && <p className={`text-red-500 ${errors.root ? 'visible' : 'invisible'}`}>{errors.root.message}</p>}
 

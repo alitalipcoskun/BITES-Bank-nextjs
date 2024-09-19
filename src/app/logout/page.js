@@ -38,15 +38,18 @@ const LogoutPage = () => {
     }, [signOut])
 
     return (
-        (<PageContainer className="flex-col items-center h-screen w-screen">
-            {cookieflag && signedOut ? (<><UIImage src="/bites_logo.jpg" /> 
-            <p className="mt-3 text-center">
-                Signed out succesfully.<br />
-                You can log in again from <Link href="/login" className="text-blue-500 underline" >here.</Link>
-            </p></>): <Spinner></Spinner>}
+        <PageContainer className="flex flex-col justify-center items-center">
+            {cookieflag && signedOut ? (
+                <div className="flex flex-col items-center justify-center">
+                    <UIImage src="/bites_logo.jpg" />
+                    <p className="mt-3 text-center">
+                        Signed out successfully.<br />
+                        You can log in again from <Link href="/login" className="text-blue-500 underline">here.</Link>
+                    </p>
+                </div>
+            ) : <Spinner />}
             <Footer />
-        </PageContainer>)
-
+        </PageContainer>
     )
 }
 

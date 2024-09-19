@@ -21,7 +21,7 @@ const LabeledInput = (props) => {
                     id={label}
                     placeholder={props.placeholder}
                     {...register(name, ruleSet)}
-                    className={errors[`${name}`] ? errorClass : "w-[50vh] mb-4"}
+                    className={errors[`${name}`] ? errorClass : "sm:w-[50vw] mb-4 w-1"}
                     disabled={isSubmitting}
                     {...props}
     

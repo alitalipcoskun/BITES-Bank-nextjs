@@ -17,6 +17,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import NewPasswordForm from './NewPasswordForm';
+import Link from 'next/link';
 
 const PasswordRecoveryRequest = (props) => {
     const { axiosInstance } = useAuthContext();
@@ -112,6 +113,7 @@ const PasswordRecoveryRequest = (props) => {
                                     isSubmitting={isSubmitting}
                                 />
                             ))}
+                            <p>You can log in from <Link href="/login" className="text-blue-500 underline">here.</Link></p>
                             <FormButton type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Submit" />
                             {errors.root && <p className={`text-red-500 ${errors.root ? 'visible' : 'invisible'}`}>{errors.root.message}</p>}
                         </form>)

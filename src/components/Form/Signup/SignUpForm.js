@@ -71,9 +71,11 @@ const SignUpForm = (props) => {
           <UIImage src={"/bites_logo.jpg"} className={"mb-4"} />
           {errors["root"] && <p className="text-red-500">{errors["root"].message}</p>}
           {signUpLabels.map((label, idx) => {
-            return <LabeledInput register={register} {...label} key={idx} errors={errors} isSubmitting={isSubmitting} name={label["name"]} ></LabeledInput>
+            return <LabeledInput register={register} {...label} key={idx} errors={errors} isSubmitting={isSubmitting} name={label["name"]} 
+            className="sm:w-[30vw] w-[50vw]"></LabeledInput>
           })}
           <p>If you're already have account on this service, you can log in from <Link href="/login" className="text-blue-500 underline">here.</Link></p>
+          <p>If you forget your password, recover from <Link href="/forget-password" className="text-blue-500 underline">here.</Link></p>
           <FormButton type="submit" isSubmitting={isSubmitting} loadingState="Loading" defaultState="Sign Up" />
         </form>
       </CardContent>

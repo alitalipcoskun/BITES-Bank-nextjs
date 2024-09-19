@@ -18,9 +18,9 @@ const SandwichMenu = ({ items }) => {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left">
-                <div className="grid w-[200px] p-4">
+                <div className="flex flex-col w-[200px] p-4">
                     {items.map((item, key) => {
-                        return <NavItem item={item} key={key}></NavItem>
+                        return <NavItem item={item} key={key} className="mb-2"></NavItem>
                     })}
                 </div>
             </SheetContent>
