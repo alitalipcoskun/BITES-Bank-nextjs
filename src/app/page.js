@@ -39,7 +39,7 @@ export default function Home() {
   const [userPhone, setUserPhone] = useState("");
 
   const [loadingState, setLoadingState] = useState(true);
-  // It is used in Table component and delete operation to provide information to user and making delete operation.
+  // It is used in Table component and delete operation to provide information to user.
   const [selectedItem, setSelectedItem] = useState(null);
 
   // Error handling state
@@ -162,10 +162,6 @@ export default function Home() {
         }
       };
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
       ws.onclose = (event) => {
         console.log('WebSocket closed. Attempting to reconnect...');
         setTimeout(connectWebSocket, 3000); // Attempt to reconnect after 3 seconds
@@ -193,13 +189,13 @@ export default function Home() {
     console.log(payload);
     try {
       const response = await axiosInstance.post("/api/v1/account/new-account", {
-        "money_type": payload.account_type
+        "moneyType": payload.account_type
       });
       // For displaying feedback to the user
       setCreatedAcc(response.data);
       // Verify that operation performed correctly. Clears previous errors about create operation.
       setError(prev => ({ ...prev, create: undefined }));
-      // Refresh accounts after creating a new one
+      // Refresh accounts after creating a new oneasd
       fetchAccounts(userPhone);
     } catch (error) {
       setError(prev => ({ ...prev, create: { message: "Failed to create account" } }));
@@ -208,13 +204,17 @@ export default function Home() {
 
   const onDelete = async () => {
     try {
-      setDialog(prev => ({ ...prev, delete: true }));
+      // Closing dialog
+      setDialog(prev => ({ ...prev, delete: false }));
+
+      // Delete request to the server
       const response = await axiosInstance.post("/api/v1/account/delete-account", {
         "no": selectedItem.no
       });
 
       setError(prev => ({ ...prev, root: undefined }));
       fetchAccounts(userPhone);
+      setSelectedItem(null);
     } catch (error) {
       setError(prev => ({ ...prev, root: { message: "Failed to delete account" } }));
     }

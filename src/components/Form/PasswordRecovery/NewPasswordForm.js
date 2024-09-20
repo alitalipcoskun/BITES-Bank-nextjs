@@ -9,32 +9,38 @@ import { passwordSchema } from './Schema';
 
 
 const NewPasswordForm = (props) => {
-    const {axiosInstance} = useAuthContext();
-    const {passwordDialogOpen, setPasswordDialogOpen, mail, code} = props;
+    const { axiosInstance } = useAuthContext();
+    const { passwordDialogOpen, setPasswordDialogOpen, mail, code, setError,  } = props;
 
-    const {register, isSubmitting, handleSubmit, formState: {errors}} = useForm({
+    const { register, isSubmitting, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(passwordSchema)
     });
 
     const onSubmit = async (data) => {
-        try{
-            const response = await axiosInstance.post("/api/v1/auth/password-change",{
+        try {
+            const response = await axiosInstance.post("/api/v1/auth/password-change", {
                 code: code,
                 mail: mail,
                 newPassword: data.password
             })
+            setPasswordDialogOpen(false);
+            showNotification("Password changed successfully", "success");
             
-        }catch(error){
-            console.log(error);
-        }  
+        } catch (error) {
+            setError("root", {
+                message:  "An error occured. Try again."
+            });
+            showNotification("Password change failed", "error");
+        }
     }
 
     return (
-        <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}
-        closeOnEscapeKeyDown={false}
-        closeOnClickOutside={false}
-        closeOnOverlayClick={false}
-        closeOnBackdropClick={false}
+        <Dialog open={passwordDialogOpen}
+            onOpenChange={setPasswordDialogOpen}
+            closeOnEscapeKeyDown={false}
+            closeOnClickOutside={false}
+            closeOnOverlayClick={false}
+            closeOnBackdropClick={false}
         >
             <DialogContent>
                 <DialogHeader>
@@ -55,7 +61,7 @@ const NewPasswordForm = (props) => {
                         className={errors.passwordAgain ? 'border-red-500' : ''}
                     />
                     {errors.passwordAgain && <p className="text-red-500">{errors.passwordAgain.message}</p>}
-                    <FormButton type="submit" isLoading={isSubmitting} loadingState="Submitting..." defaultState= "Submit">Submit</FormButton>
+                    <FormButton type="submit" isLoading={isSubmitting} loadingState="Submitting..." defaultState="Submit">Submit</FormButton>
                 </form>
             </DialogContent>
         </Dialog>

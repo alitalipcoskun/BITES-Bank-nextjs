@@ -1,6 +1,6 @@
 export const AccountColumns = [
     {
-        field: "money_type",
+        field: "moneyType",
         header: "Account type"
     },
     {

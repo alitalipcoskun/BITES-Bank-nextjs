@@ -15,16 +15,7 @@ import { accOptions } from './AccountOptions';
 const CreateAccForm = (props) => {
     // Library allows control and give feedback to user precisely.
     const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({ resolver: yupResolver(createAccSchema) });
-    const { onSubmit, errMsg } = props;
-
-    const errCheck = useCallback(() => {
-        setError(errMsg)
-    }, [errMsg]);
-
-
-    useEffect(() => {
-        errCheck();
-    }, [errCheck]);
+    const { onSubmit } = props;
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>

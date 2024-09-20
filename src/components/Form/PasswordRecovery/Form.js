@@ -13,11 +13,12 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Toast } from 'primereact/toast';
-import { InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 import NewPasswordForm from './NewPasswordForm';
 import Link from 'next/link';
+import OTPForm from './OTPForm';
 
 const PasswordRecoveryRequest = (props) => {
     const { axiosInstance } = useAuthContext();
@@ -63,25 +64,28 @@ const PasswordRecoveryRequest = (props) => {
     }
 
     const onCodeSubmit = async () => {
-        try {
-            const response = await axiosInstance.post("/api/v1/auth/recover-password", {
-                token: recoveryCode,
-                mail: mail
-            });
-            console.log(response);
-            if (response.status === 200) {
+
+        const response = await axiosInstance.post("/api/v1/auth/recover-password", {
+            token: recoveryCode,
+            mail: mail
+        });
+        console.log(response);
+
+        if (response.status === 200) {
+
+            if (response.data === "True") {
                 setDialogOpen(false);
-                if (response.data === "True") {
-                    setCode(recoveryCode);
-                    setPasswordDialogOpen(true);
-                }
-            } else {
-                showNotification("error", "Error", "An error occurred while processing your request.");
+                console.log(response);
+                setCode(recoveryCode);
+                setPasswordDialogOpen(true);
             }
-        } catch (error) {
-            console.log(error);
-            showNotification("error", "Error", "An error occurred while processing your request.");
+            else {
+                console.log("Entered!");
+                showNotification("error", "Error", "An error occurred while processing your request.");
+                throw new Error("Invalid code");
+            }
         }
+
     }
 
     return (
@@ -126,28 +130,20 @@ const PasswordRecoveryRequest = (props) => {
                             <DialogHeader>
                                 <DialogTitle>Enter 6-digit OTP Code</DialogTitle>
                             </DialogHeader>
-
-                            <div className="flex flex-col justify-center">
-                                <InputOTP
-                                    value={recoveryCode}
-                                    onChange={setRecoveryCode}
-                                    maxLength={6}
-                                    onComplete={onCodeSubmit}
-                                >
-                                    <InputOTPGroup className="flex gap-2"> {/* Changed to flex layout for one row */}
-                                        <InputOTPSlot index={0} className="border p-2 text-center" />
-                                        <InputOTPSlot index={1} className="border p-2 text-center" />
-                                        <InputOTPSlot index={2} className="border p-2 text-center" />
-                                        <InputOTPSlot index={3} className="border p-2 text-center" />
-                                        <InputOTPSlot index={4} className="border p-2 text-center" />
-                                        <InputOTPSlot index={5} className="border p-2 text-center" />
-                                    </InputOTPGroup>
-                                </InputOTP>
-                            </div>
-
+                            <OTPForm
+                                recoveryCode={recoveryCode}
+                                setRecoveryCode={setRecoveryCode}
+                                maxLength={6}
+                                onCodeSubmit={onCodeSubmit}
+                            />
                         </DialogContent>
                     </Dialog>
-                    <NewPasswordForm passwordDialogOpen={passwordDialogOpen} setPasswordDialogOpen={setPasswordDialogOpen} mail={mail} code={recoveryCode} />
+                    <NewPasswordForm
+                        passwordDialogOpen={passwordDialogOpen}
+                        setPasswordDialogOpen={setPasswordDialogOpen}
+                        mail={mail}
+                        code={recoveryCode}
+                        showNotification={showNotification} />
                 </CardContent>
             </Card>
         </PageContainer >
