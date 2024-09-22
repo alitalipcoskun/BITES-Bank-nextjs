@@ -90,7 +90,7 @@ Sometimes, the container does not install the required packages. If you face the
 
 ## User Authentication and Authorization in React
 
-<img src="(readme_images/react_auth_diagram.png" width="50%" height="auto" alt="Screenshot">
+<img src="readme_images/react_auth_diagram.png" width="50%" height="auto" alt="Screenshot">
 
 The diagram simply explains what happened and what to expect from a backend service and a React application. It may also be said as traditional life cycle of a product.
 
@@ -98,8 +98,7 @@ Authentication is important to build a secured application. The security vulnera
 
 ### Server
 The server must know who are the users are hence it returns responses to these users' requests. It wants to send the data to authenticated or authorized user hence every data from the database of the server should not send to every user for security purposes.
-The server has to authenticate every single request who wants to user, identify user and return the response if it has permission as success otherwise no permission.
-
+The server has to authenticate every single request who wants to user, identify user and return the response if it has permission as success otherwise no permission.+
 ### Users
 The users should not communicate `directly` with the server.
 
