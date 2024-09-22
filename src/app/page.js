@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useCallback, useState } from "react";
 import Cookies from 'js-cookie';
+import axios from 'axios';
 import { useAuthContext } from "@/components/AuthContext/AuthProvider";
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
@@ -20,8 +21,8 @@ export default function Home() {
   // Error handling
   const { showBoundary } = useErrorBoundary();
 
-  // Axios configuration.
-  const { user, axiosInstance, token,checkToken, LoginUser } = useAuthContext();
+  // Auth context
+  const { user, token, checkToken, LoginUser } = useAuthContext();
 
   // State management for token
   const [useToken, setToken] = useState(Cookies.get("jwt") !== undefined);
@@ -59,17 +60,20 @@ export default function Home() {
   // Performs get operation to reach to account information of the user.
   const fetchAccounts = useCallback(async (phone) => {
     try {
-      const response = await axiosInstance.get(
-        `/api/v1/account/accounts`,
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/account/accounts`,
         {
           params: {
             phoneNumber: phone
+          },
+          headers: {
+            Authorization: `Bearer ${Cookies.get('jwt')}`
           }
         }
       );
 
       // Errors will thrown with respect to the response status.
-      if (token === undefined) {
+      if (!Cookies.get('jwt')) {
         router.push("/login");
       }
       // Set accounts to response data to display it on the screen
@@ -81,23 +85,29 @@ export default function Home() {
       // Handle the error appropriately, e.g., set an error message
       setError(prev => ({ ...prev, account: { message: "Failed to fetch accounts" } }));
     }
-  }, [token, userPhone, axiosInstance, router]);
+  }, [router]);
 
   // Performs post operation to get user information from the backend service.
   const fetchUser = useCallback(async () => {
     try {
-      console.log(token);
-      if(token === undefined || token === null){
+      const jwt = Cookies.get('jwt');
+      console.log(jwt);
+      if(jwt === undefined || jwt === null){
         router.push("/login");
         return;
       }
-      const response = await axiosInstance.post(
-        '/api/v1/user/profile',
-        { token: token }
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/profile`,
+        { token: jwt },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`
+          }
+        }
       );
 
       // Errors will thrown with respect to the response status.
-      if (token === undefined) {
+      if (!jwt) {
         router.push("/login");
         return;
       }
@@ -119,7 +129,7 @@ export default function Home() {
       router.push("/login");
       setLoadingState(false);
     }
-  }, [token, router, LoginUser, fetchAccounts, showBoundary, axiosInstance]);
+  }, [router, LoginUser, fetchAccounts, showBoundary]);
 
 
   useEffect(() => {
@@ -131,8 +141,8 @@ export default function Home() {
     const redirectTimeout = setTimeout(() => {
       if (loadingState || !user) {
         checkToken();
-        console.log(token);
-        if(token === undefined || token === null){
+        console.log(Cookies.get('jwt'));
+        if(!Cookies.get('jwt')){
           console.log("Loading timeout reached. Redirecting to login.");
           router.push("/login");
           return;
@@ -188,9 +198,17 @@ export default function Home() {
   const onSubmit = async (payload) => {
     console.log(payload);
     try {
-      const response = await axiosInstance.post("/api/v1/account/new-account", {
-        "moneyType": payload.account_type
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/account/new-account`,
+        {
+          "moneyType": payload.account_type
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('jwt')}`
+          }
+        }
+      );
       // For displaying feedback to the user
       setCreatedAcc(response.data);
       // Verify that operation performed correctly. Clears previous errors about create operation.
@@ -208,9 +226,17 @@ export default function Home() {
       setDialog(prev => ({ ...prev, delete: false }));
 
       // Delete request to the server
-      const response = await axiosInstance.post("/api/v1/account/delete-account", {
-        "no": selectedItem.no
-      });
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/account/delete-account`,
+        {
+          "no": selectedItem.no
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('jwt')}`
+          }
+        }
+      );
 
       setError(prev => ({ ...prev, root: undefined }));
       fetchAccounts(userPhone);

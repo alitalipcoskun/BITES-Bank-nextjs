@@ -8,9 +8,11 @@ import TransactionForm from '@/components/Form/Transaction/TransactionForm';
 import { TransactionColumns } from './TransactionColumns';
 import Table from '@/components/Table/Table';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 const TransactionsPage = (props) => {
-  const { LoginUser, axiosInstance, checkToken, token } = useAuthContext();
+  const { LoginUser, checkToken } = useAuthContext();
   const [transactions, setTransactions] = useState(undefined);
   const [creationError, setCreationError] = useState({ "root": undefined });
   const [selectedItem, setSelectedItem] = useState(undefined);
@@ -23,13 +25,19 @@ const TransactionsPage = (props) => {
 
   const fetchUser = useCallback(async () => {
     try {
-      const response = await axiosInstance.post(
-        '/api/v1/user/profile',
-        { token: token }
+      const token = Cookies.get('jwt');
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/profile`,
+        { token: token },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
       console.log(response);
       // Errors will thrown with respect to the response status.
-      if (token === undefined) {
+      if (!token) {
         router.push("/login");
       }
       LoginUser(response.data);
@@ -45,7 +53,7 @@ const TransactionsPage = (props) => {
         }
       });
     }
-  }, [token, LoginUser, axiosInstance, router]);
+  }, [LoginUser, router]);
 
   const fetchTransactions = useCallback(async (account) => {
     try {
@@ -54,8 +62,9 @@ const TransactionsPage = (props) => {
         return;
       }
 
-      const response = await axiosInstance.get(
-        '/api/v1/transaction/list-transactions',
+      const token = Cookies.get('jwt');
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/transaction/list-transactions`,
         {
           params: {
             phoneNumber: phone,
@@ -78,7 +87,7 @@ const TransactionsPage = (props) => {
       console.error("Error fetching transactions:", error);
       setCreationError({ "root": error.response?.data?.message || "Failed to fetch transactions" });
     }
-  }, [axiosInstance, phone, token]);
+  }, [phone]);
 
   const setSearchAccount = async (account) => {
     try {
@@ -94,7 +103,8 @@ const TransactionsPage = (props) => {
   useEffect(() => {
     setLoadingState(true);
     checkToken();
-    if (token === undefined || token === null) {
+    const token = Cookies.get('jwt');
+    if (!token) {
       router.push("/login");
     }
     // Perfom get and post operation for user profile and account informations nested.
@@ -103,8 +113,8 @@ const TransactionsPage = (props) => {
     const redirectTimeout = setTimeout(() => {
       if (loadingState) {
         checkToken();
-        console.log(token);
-        if (token === undefined || token === null) {
+        const token = Cookies.get('jwt');
+        if (!token) {
           console.log("Loading timeout reached. Redirecting to login.");
           router.push("/login");
           return;
@@ -116,7 +126,7 @@ const TransactionsPage = (props) => {
     setLoadingState(false);
     return () => clearTimeout(redirectTimeout);
 
-  }, [fetchUser, checkToken, router, token, loadingState]);
+  }, [fetchUser, checkToken, router, loadingState]);
 
   return (
     <PageTemplate>

@@ -9,7 +9,7 @@ import ProfileForm from '@/components/Form/Profile/ProfileForm';
 import { useRouter } from 'next/navigation';
 import { useErrorBoundary } from 'react-error-boundary';
 import { Toast } from 'primereact/toast';
-
+import axios from 'axios';
 
 const ProfilePage = () => {
     const [token, setToken] = useState(Cookies.get("jwt"));
@@ -18,7 +18,7 @@ const ProfilePage = () => {
     const [profileData, setProfileData] = useState(null);
 
     const router = useRouter();
-    const { axiosInstance, LoginUser, user } = useAuthContext();
+    const { LoginUser, user } = useAuthContext();
     const { showBoundary } = useErrorBoundary();
     const toast = useRef(null);
 
@@ -28,9 +28,14 @@ const ProfilePage = () => {
                 router.push("/login");
                 return;
             }
-            const response = await axiosInstance.post(
-                '/api/v1/user/profile',
-                { token: token }
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/profile`,
+                { token: token },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
             );
             LoginUser(response.data);
             setProfileData(response.data);
@@ -44,7 +49,7 @@ const ProfilePage = () => {
         } finally {
             setLoadingState(false);
         }
-    }, [token, router, LoginUser, axiosInstance, showBoundary]);
+    }, [token, router, LoginUser, showBoundary]);
 
     useEffect(() => {
         if (!token) {
@@ -85,7 +90,7 @@ const ProfilePage = () => {
                         ) : (
                             <ProfileForm
                                 user={profileData}
-                                axiosInstance={axiosInstance}
+                                token={token}
                                 onSuccess={(message) => showToast('success', 'Success', message)}
                                 onError={(message) => showToast('error', 'Error', message)}
                             />
